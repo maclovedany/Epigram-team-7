@@ -1,103 +1,190 @@
-import Image from "next/image";
+import {
+  Button,
+  Input,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-bg-secondary p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-text-primary mb-2">
+            🌟 Epigram 디자인 시스템
+          </h1>
+          <p className="text-text-secondary">
+            컴포넌트들과 디자인 토큰 확인 페이지
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Color Palette */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Color Palette</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Primary Colors</h3>
+                <div className="flex gap-2">
+                  {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map(
+                    (shade) => (
+                      <div key={shade} className="text-center">
+                        <div
+                          className={`w-12 h-12 rounded-lg bg-primary-${shade} border`}
+                        />
+                        <span className="text-xs mt-1 block">{shade}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium mb-2">Gray Colors</h3>
+                <div className="flex gap-2">
+                  {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map(
+                    (shade) => (
+                      <div key={shade} className="text-center">
+                        <div
+                          className={`w-12 h-12 rounded-lg bg-gray-${shade} border`}
+                        />
+                        <span className="text-xs mt-1 block">{shade}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Typography */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Typography</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-4xl font-bold">Heading 1 - 제목입니다</h1>
+                <h2 className="text-3xl font-bold">Heading 2 - 부제목입니다</h2>
+                <h3 className="text-2xl font-bold">Heading 3 - 소제목입니다</h3>
+                <p className="text-base text-text-primary">
+                  본문 텍스트입니다. Pretendard 폰트가 적용되어 있습니다.
+                </p>
+                <p className="text-sm text-text-secondary">
+                  보조 텍스트입니다. 조금 더 작은 크기입니다.
+                </p>
+                <p className="text-xs text-text-tertiary">
+                  캡션 텍스트입니다. 가장 작은 크기입니다.
+                </p>
+              </div>
+              <div className="font-serif">
+                <p className="text-lg">
+                  "오늘을 잡을 그리는 사람은 어제를 붙든다" - 세리프 폰트 예시
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Buttons */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Buttons</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex gap-4 items-center">
+                <Button variant="primary">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="outline">Outline</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="danger">Danger</Button>
+              </div>
+
+              <div className="flex gap-4 items-center">
+                <Button size="sm">Small</Button>
+                <Button size="md">Medium</Button>
+                <Button size="lg">Large</Button>
+              </div>
+
+              <div className="flex gap-4 items-center">
+                <Button isLoading>Loading</Button>
+                <Button disabled>Disabled</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Form Elements */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Form Elements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6 max-w-md">
+              <Input
+                label="이메일"
+                type="email"
+                placeholder="your@email.com"
+                helperText="이메일 주소를 입력해주세요"
+              />
+
+              <Input
+                label="비밀번호"
+                type="password"
+                placeholder="••••••••"
+                required
+              />
+
+              <Input
+                label="오류 예시"
+                placeholder="잘못된 입력"
+                error="올바른 형식이 아닙니다"
+              />
+
+              <Button className="w-full">회원가입</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cards */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Card Variants</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card variant="default" padding="sm">
+                <h3 className="font-medium mb-2">Default Card</h3>
+                <p className="text-sm text-text-secondary">
+                  기본 카드 스타일입니다.
+                </p>
+              </Card>
+
+              <Card variant="outlined" padding="sm">
+                <h3 className="font-medium mb-2">Outlined Card</h3>
+                <p className="text-sm text-text-secondary">
+                  테두리가 강조된 카드입니다.
+                </p>
+              </Card>
+
+              <Card variant="elevated" padding="sm">
+                <h3 className="font-medium mb-2">Elevated Card</h3>
+                <p className="text-sm text-text-secondary">
+                  그림자가 있는 카드입니다.
+                </p>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
