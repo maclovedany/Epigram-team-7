@@ -35,7 +35,7 @@ export default function Header() {
             href="/epigrams"
             className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
           >
-            에피그램 둘러보기
+            피드
           </Link>
           {isAuthenticated && (
             <Link
