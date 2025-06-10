@@ -9,55 +9,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap");
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-  }
-
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-white text-text-primary font-sans antialiased;
+    @apply font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  /* Typography */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-semibold tracking-tight;
-  }
-
-  h1 {
-    @apply text-3xl leading-tight;
-  }
-
-  h2 {
-    @apply text-2xl leading-tight;
-  }
-
-  h3 {
-    @apply text-xl leading-snug;
-  }
-
-  /* Focus styles */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
-  }
-
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* Selection */
-  ::selection {
-    @apply bg-primary-100 text-primary-900;
   }
 }
 
@@ -68,10 +22,10 @@
   }
 
   .input {
-    @apply flex h-10 w-full rounded-lg border border-border-default bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .card {
-    @apply rounded-xl border border-border-default bg-white shadow-card;
+    @apply rounded-xl border bg-white shadow-card;
   }
 }

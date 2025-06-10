@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui";
 import { useAuthStore } from "@/store/authStore";
-import { authService } from "@/services/authService";
+import { authService } from "@/lib/api";
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -20,35 +21,42 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1">
-            <span className="text-2xl">📝</span>
-            <span className="text-xl font-bold text-text-primary">Epigram</span>
-          </div>
-        </Link>
-
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/epigrams"
-            className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          >
-            피드
+      <div className="container mx-auto flex h-16 items-center px-4">
+        {/* Logo와 Navigation을 함께 묶기 */}
+        <div className="flex items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Epigram"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+            />
           </Link>
-          {isAuthenticated && (
-            <Link
-              href="/addepigram"
-              className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-            >
-              에피그램 작성
-            </Link>
-          )}
-        </nav>
 
-        {/* Auth Section */}
-        <div className="flex items-center space-x-3">
+          {/* Navigation - 로고 바로 옆에 배치 */}
+          <nav className="flex items-center ml-5">
+            <Link
+              href="/epigramlist"
+              className="text-lg font-medium transition-colors hover:opacity-80"
+              style={{ color: "#373737" }}
+            >
+              피드
+            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/addepigram"
+                className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors ml-8"
+              >
+                에피그램 작성
+              </Link>
+            )}
+          </nav>
+        </div>
+
+        {/* Auth Section - 오른쪽 끝에 배치 */}
+        <div className="flex items-center space-x-3 ml-auto">
           {isAuthenticated && user ? (
             // 로그인된 상태
             <>
