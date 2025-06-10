@@ -1,16 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  MessageCircle,
-  Send,
-  User,
-  MoreVertical,
-  Edit3,
-  Trash2,
-} from "lucide-react";
+import { MessageCircle, Send, User, Edit3, Trash2 } from "lucide-react";
 import {
   Button,
   Card,
@@ -26,7 +19,6 @@ import {
 import { commentService } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { Comment } from "@/types";
-import { cn } from "@/lib/utils";
 
 interface CommentSectionProps {
   epigramId: string;
@@ -61,22 +53,24 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   });
 
   // 댓글 목록 로드
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
       const response = await commentService.getComments(epigramId);
       setComments(response.list);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "댓글을 불러오는데 실패했습니다.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [epigramId]);
 
   useEffect(() => {
     loadComments();
-  }, [epigramId]);
+  }, [loadComments]);
 
   // 댓글 작성
   const onSubmitComment = async (data: CreateCommentFormData) => {
@@ -87,8 +81,10 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
       await commentService.createComment(epigramId, data);
       reset();
       loadComments(); // 댓글 목록 새로고침
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "댓글 작성에 실패했습니다.";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -103,8 +99,10 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
       setEditingId(null);
       resetEdit();
       loadComments();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "댓글 수정에 실패했습니다.";
+      setError(errorMessage);
     }
   };
 
@@ -115,8 +113,10 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     try {
       await commentService.deleteComment(epigramId, commentId.toString());
       loadComments();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "댓글 삭제에 실패했습니다.";
+      setError(errorMessage);
     }
   };
 

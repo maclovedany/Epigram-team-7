@@ -31,22 +31,26 @@ export default function EpigramDetailPage() {
   const epigramId = params.id as string;
 
   // 에피그램 데이터 로드
-  const loadEpigram = async () => {
-    try {
-      setIsLoading(true);
-      setError("");
-      const data = await epigramService.getEpigramById(epigramId);
-      setEpigram(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadEpigramData = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+        const data = await epigramService.getEpigramById(epigramId);
+        setEpigram(data);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "에피그램을 불러오는데 실패했습니다.";
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (epigramId) {
-      loadEpigram();
+      loadEpigramData();
     }
   }, [epigramId]);
 
@@ -62,7 +66,7 @@ export default function EpigramDetailPage() {
         isLiked: result.isLiked,
         likeCount: result.likeCount,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("좋아요 처리 실패:", err);
     } finally {
       setIsLiking(false);
@@ -76,8 +80,10 @@ export default function EpigramDetailPage() {
     try {
       await epigramService.deleteEpigram(epigram.id.toString());
       router.push("/epigramlist");
-    } catch (err: any) {
-      alert("삭제에 실패했습니다: " + err.message);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "삭제에 실패했습니다.";
+      alert("삭제에 실패했습니다: " + errorMessage);
     }
   };
 
@@ -86,7 +92,7 @@ export default function EpigramDetailPage() {
     if (!epigram) return;
 
     const shareUrl = window.location.href;
-    const shareText = `"${epigram.content}" - ${epigram.author}`;
+    const shareText = `&quot;${epigram.content}&quot; - ${epigram.author}`;
 
     if (navigator.share) {
       try {
@@ -95,7 +101,7 @@ export default function EpigramDetailPage() {
           text: shareText,
           url: shareUrl,
         });
-      } catch (err) {
+      } catch {
         // 공유 취소시 에러 무시
       }
     } else {
@@ -103,7 +109,7 @@ export default function EpigramDetailPage() {
       try {
         await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
         alert("링크가 클립보드에 복사되었습니다!");
-      } catch (err) {
+      } catch {
         alert("공유 링크: " + shareUrl);
       }
     }
@@ -214,7 +220,7 @@ export default function EpigramDetailPage() {
             <CardContent className="p-8">
               {/* 에피그램 내용 */}
               <blockquote className="text-2xl font-serif text-text-primary leading-relaxed mb-6 text-center">
-                "{epigram.content}"
+                &ldquo;{epigram.content}&rdquo;
               </blockquote>
 
               {/* 작가 정보 */}

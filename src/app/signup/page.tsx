@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Input } from "@/components/ui";
 import { signupSchema, type SignupFormData } from "@/lib/validations";
 import { authService } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
@@ -36,8 +35,10 @@ export default function SignupPage() {
       login(response.user, response.accessToken);
 
       router.push("/");
-    } catch (error: any) {
-      setApiError(error.message);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "회원가입에 실패했습니다.";
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
     }

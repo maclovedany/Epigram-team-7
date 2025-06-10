@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { useAuthStore } from "@/store/authStore";
@@ -17,38 +17,45 @@ export default function EpigramListPage() {
   const { isAuthenticated } = useAuthStore();
 
   // 에피그램 목록 로드
-  const loadEpigrams = async (isLoadMore = false) => {
-    if (isLoading) return;
+  const loadEpigrams = useCallback(
+    async (isLoadMore = false) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      const params: any = {
-        limit: ITEMS_PER_LOAD,
-      };
+      setIsLoading(true);
+      try {
+        const params: { limit: number; cursor?: number } = {
+          limit: ITEMS_PER_LOAD,
+        };
 
-      // 더보기인 경우 cursor 추가
-      if (isLoadMore && nextCursor) {
-        params.cursor = nextCursor;
+        // 더보기인 경우 cursor 추가
+        if (isLoadMore && nextCursor) {
+          params.cursor = nextCursor;
+        }
+
+        const response = await epigramService.getEpigrams(params);
+
+        if (isLoadMore) {
+          // 더보기인 경우 기존 목록에 추가
+          setEpigrams((prev) => [...prev, ...response.list]);
+        } else {
+          // 초기 로드인 경우 새로 설정
+          setEpigrams(response.list);
+        }
+
+        setNextCursor(response.nextCursor || null);
+        setHasMore(!!response.nextCursor);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "에피그램을 불러오는데 실패했습니다.";
+        console.error("에피그램 로딩 실패:", errorMessage);
+      } finally {
+        setIsLoading(false);
       }
-
-      const response = await epigramService.getEpigrams(params);
-
-      if (isLoadMore) {
-        // 더보기인 경우 기존 목록에 추가
-        setEpigrams((prev) => [...prev, ...response.list]);
-      } else {
-        // 초기 로드인 경우 새로 설정
-        setEpigrams(response.list);
-      }
-
-      setNextCursor(response.nextCursor || null);
-      setHasMore(!!response.nextCursor);
-    } catch (error) {
-      console.error("에피그램 로딩 실패:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [isLoading, nextCursor]
+  );
 
   // 더보기 버튼 클릭
   const handleLoadMore = () => {
@@ -58,7 +65,7 @@ export default function EpigramListPage() {
   // 초기 로드
   useEffect(() => {
     loadEpigrams(false);
-  }, []);
+  }, [loadEpigrams]);
 
   return (
     <div className="min-h-screen bg-gray-50">
