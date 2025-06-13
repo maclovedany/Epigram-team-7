@@ -81,12 +81,45 @@ export const epigramService = {
         endpoints.epigrams,
         { params }
       );
-      return response.data.data;
+
+      // 응답 데이터 검증
+      if (!response.data) {
+        throw new Error("서버 응답이 올바르지 않습니다.");
+      }
+
+      const data = response.data.data;
+
+      // 데이터 구조 검증 및 기본값 설정
+      if (!data) {
+        return {
+          list: [],
+          totalCount: 0,
+          nextCursor: undefined,
+        };
+      }
+
+      return {
+        list: Array.isArray(data.list) ? data.list : [],
+        totalCount: typeof data.totalCount === "number" ? data.totalCount : 0,
+        nextCursor: data.nextCursor,
+      };
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "에피그램을 불러오는데 실패했습니다.";
+      // axios 에러 처리
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      const axiosError = error as any;
+      let message = "에피그램을 불러오는데 실패했습니다.";
+
+      if (axiosError.response?.data?.message) {
+        message = axiosError.response.data.message;
+      } else if (axiosError.response?.status) {
+        message = `서버 오류 (${axiosError.response.status})`;
+      } else if (axiosError.message) {
+        message = axiosError.message;
+      }
+
       throw new Error(message);
     }
   },
