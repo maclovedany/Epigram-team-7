@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import { useAuthStore } from "@/store/authStore";
 import { epigramService } from "@/lib/api";
 import { Epigram } from "@/types";
+import { FloatingActionButton } from "./components";
 
 const ITEMS_PER_LOAD = 6;
 

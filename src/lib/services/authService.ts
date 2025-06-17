@@ -22,7 +22,10 @@ export const authService = {
   // 회원가입
   signup: async (data: SignupRequest): Promise<AuthResponse> => {
     try {
-      const response = await api.post<AuthResponse>("/auth/signup", data);
+      const response = await api.post<AuthResponse>(
+        "/14-차경훈/auth/signUp",
+        data
+      );
       return response.data;
     } catch (error) {
       const message =

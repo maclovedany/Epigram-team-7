@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authService } from "@/lib/api";
+import { authService } from "@/lib/services/authService";
 import { useAuthStore } from "@/store/authStore";
 import { z } from "zod";
 
