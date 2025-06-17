@@ -98,20 +98,23 @@ export const epigramService = {
   },
 
   // 에피그램 생성
-  createEpigram: async (data: CreateEpigramRequest): Promise<Epigram> => {
-    try {
-      const response = await api.post<ApiResponse<Epigram>>(
-        `/${TEAM_ID}/epigrams`,
-        data
-      );
-      return response.data.data;
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "에피그램 작성에 실패했습니다.";
-      throw new Error(message);
-    }
+  createEpigram: async (data: {
+    content: string;
+    author: string;
+    referenceTitle?: string;
+    referenceUrl?: string;
+    tags: string[];
+  }) => {
+    const response = await fetch(
+      "https://fe-project-epigram-api.vercel.app/14-차경훈/epigrams",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
+    if (!response.ok) throw new Error("에피그램 저장에 실패했습니다.");
+    return response.json();
   },
 
   // 에피그램 수정

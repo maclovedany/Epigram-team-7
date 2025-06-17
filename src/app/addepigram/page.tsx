@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
+import { epigramService } from "@/lib/services/epigramService";
 
 export default function AddEpigramPage() {
   const router = useRouter();
@@ -58,10 +59,20 @@ export default function AddEpigramPage() {
     e.preventDefault();
     if (isFormInvalid) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      // 목업: id=123로 이동
-      router.push("/epigramlist/123");
-    }, 500);
+    try {
+      const result = await epigramService.createEpigram({
+        content,
+        author: authorType === "직접입력" ? author : authorType,
+        referenceTitle,
+        referenceUrl,
+        tags,
+      });
+      router.push("/epigramlist");
+    } catch (err) {
+      setError("에피그램 저장에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
