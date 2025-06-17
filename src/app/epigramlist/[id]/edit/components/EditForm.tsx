@@ -1,139 +1,133 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Save } from "lucide-react";
-import {
-  Button,
-  Input,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui";
-import Textarea from "@/components/ui/Textarea";
-import TagInput from "@/components/ui/TagInput";
-import {
-  createEpigramSchema,
-  type CreateEpigramFormData,
-} from "@/lib/validations";
+import { useEditEpigram } from "../hooks/useEditEpigram";
 
-interface EditFormProps {
-  defaultValues: CreateEpigramFormData;
-  onSubmit: (data: CreateEpigramFormData) => Promise<void>;
-  isSubmitting: boolean;
-  apiError?: string;
-}
-
-export const EditForm = ({
-  defaultValues,
-  onSubmit,
-  isSubmitting,
-  apiError,
-}: EditFormProps) => {
+export default function EditForm() {
   const {
-    register,
-    control,
+    formData,
+    setContent,
+    setAuthor,
+    setReferenceTitle,
+    setReferenceUrl,
+    setTagInput,
+    validation,
+    isSubmitting,
+    error,
+    handleTagKeyDown,
+    handleTagRemove,
     handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<CreateEpigramFormData>({
-    resolver: zodResolver(createEpigramSchema),
-    defaultValues,
-  });
-
-  const watchedContent = watch("content", "");
+  } = useEditEpigram();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Save className="w-5 h-5" />
-          에피그램 수정
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* API 에러 메시지 */}
-          {apiError && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-              {apiError}
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* 내용 */}
+      <div>
+        <label className="block font-semibold mb-2">
+          내용 <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          className="w-full h-28 border rounded-lg px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+          maxLength={500}
+          value={formData.content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="500자 이내로 입력해주세요."
+          required
+        />
+        <div className="flex justify-between mt-1 text-xs">
+          <span className="text-gray-400">{formData.content.length}/500자</span>
+          {validation.contentError && (
+            <span className="text-red-500">{validation.contentError}</span>
           )}
+        </div>
+      </div>
 
-          {/* 에피그램 내용 */}
-          <Textarea
-            label="에피그램 내용"
-            placeholder="인상 깊었던 명언이나 글귀를 입력해주세요..."
-            rows={4}
-            error={errors.content?.message}
-            helperText={`${watchedContent.length}/500자`}
-            required
-            {...register("content")}
-          />
-
-          {/* 작가 */}
-          <Input
-            label="작가"
-            placeholder="작가명을 입력해주세요"
-            error={errors.author?.message}
-            required
-            {...register("author")}
-          />
-
-          {/* 출처 정보 */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-900">
-              출처 정보 (선택사항)
-            </h3>
-
-            <Input
-              label="출처 제목"
-              placeholder="책 제목, 영화 제목 등"
-              error={errors.referenceTitle?.message}
-              {...register("referenceTitle")}
-            />
-
-            <Input
-              label="출처 URL"
-              type="url"
-              placeholder="https://example.com"
-              error={errors.referenceUrl?.message}
-              helperText="참고할 수 있는 링크가 있다면 입력해주세요"
-              {...register("referenceUrl")}
-            />
+      {/* 저자 */}
+      <div>
+        <label className="block font-semibold mb-2">
+          저자 <span className="text-red-500">*</span>
+        </label>
+        <input
+          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={formData.author}
+          onChange={(e) => setAuthor(e.target.value)}
+          placeholder="저자 이름 입력"
+          required
+        />
+        {validation.authorError && (
+          <div className="text-red-500 text-xs mt-1">
+            {validation.authorError}
           </div>
+        )}
+      </div>
 
-          {/* 태그 */}
-          <Controller
-            name="tags"
-            control={control}
-            render={({ field }) => (
-              <TagInput
-                label="태그"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.tags?.message}
-                helperText="관련된 키워드를 태그로 추가해보세요 (최대 5개)"
-                maxTags={5}
-              />
-            )}
-          />
+      {/* 출처 */}
+      <div>
+        <label className="block font-semibold mb-2">출처</label>
+        <input
+          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 mb-2"
+          value={formData.referenceTitle}
+          onChange={(e) => setReferenceTitle(e.target.value)}
+          placeholder="출처 제목 입력"
+        />
+        <input
+          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={formData.referenceUrl}
+          onChange={(e) => setReferenceUrl(e.target.value)}
+          placeholder="URL (ex. https://www.website.com)"
+          type="url"
+        />
+      </div>
 
-          {/* 제출 버튼 */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="submit"
-              className="flex-1"
-              isLoading={isSubmitting}
-              disabled={isSubmitting}
+      {/* 태그 */}
+      <div>
+        <label className="block font-semibold mb-2">태그</label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {formData.tags.map((tag) => (
+            <span
+              key={tag}
+              className="bg-[#edf0f4] px-3 py-1 rounded-full text-sm flex items-center"
             >
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "수정 중..." : "에피그램 수정"}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+              #{tag}
+              <button
+                type="button"
+                className="ml-1 text-gray-400 hover:text-red-500"
+                onClick={() => handleTagRemove(tag)}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <input
+          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
+          value={formData.tagInput}
+          onChange={(e) =>
+            setTagInput(e.target.value.replace(/[^\w가-힣]/g, "").slice(0, 10))
+          }
+          onKeyDown={handleTagKeyDown}
+          placeholder="입력하여 태그 작성 (최대 10자, 최대 3개)"
+          disabled={formData.tags.length >= 3}
+        />
+        {validation.tagError && (
+          <div className="text-red-500 text-xs mt-1">{validation.tagError}</div>
+        )}
+      </div>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {/* 저장 버튼 */}
+      <button
+        type="submit"
+        className="w-full h-12 rounded-lg bg-[#CBD3E1] text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={validation.isFormInvalid || isSubmitting}
+      >
+        {isSubmitting ? "수정 중..." : "수정 완료"}
+      </button>
+    </form>
   );
-};
+}

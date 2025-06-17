@@ -9,7 +9,7 @@ interface EpigramPreviewProps {
   tags: string[];
 }
 
-export function EpigramPreview({
+export default function EpigramPreview({
   content,
   author,
   referenceTitle,

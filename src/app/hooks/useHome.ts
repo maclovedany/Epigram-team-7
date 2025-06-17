@@ -1,29 +1,11 @@
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 
-export const useHome = () => {
-  const { isAuthenticated } = useAuthStore();
-  const router = useRouter();
-
-  const handleGetStarted = () => {
-    if (isAuthenticated) {
-      router.push("/epigramlist");
-    } else {
-      router.push("/login");
-    }
-  };
-
-  const handleCreateEpigram = () => {
-    if (isAuthenticated) {
-      router.push("/addepigram");
-    } else {
-      router.push("/login");
-    }
-  };
+export function useHome() {
+  // 현재 홈 페이지는 정적이므로 특별한 로직이 없습니다.
+  // 향후 사용자 통계나 추천 에피그램 등이 추가될 경우 여기에 로직을 구현할 수 있습니다.
 
   return {
-    isAuthenticated,
-    handleGetStarted,
-    handleCreateEpigram,
+    // 현재는 빈 상태이지만 향후 확장 가능
   };
-};
+}

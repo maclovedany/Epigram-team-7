@@ -3,10 +3,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui";
 
 interface ErrorStateProps {
-  error: string;
+  error?: string;
 }
 
-export function ErrorState({ error }: ErrorStateProps) {
+export default function ErrorState({ error }: ErrorStateProps) {
   return (
     <div className="min-h-screen bg-bg-secondary">
       <div className="container mx-auto px-4 py-8">

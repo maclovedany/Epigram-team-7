@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { ArrowLeft, Share2, Edit3, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit3, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui";
 
 interface EpigramDetailHeaderProps {
+  isAuthor: boolean;
   onShare: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  canEdit: boolean;
+  onDelete: () => void;
+  epigramId: string;
 }
 
-export function EpigramDetailHeader({
+export default function EpigramDetailHeader({
+  isAuthor,
   onShare,
-  onEdit,
   onDelete,
-  canEdit,
+  epigramId,
 }: EpigramDetailHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-8">
@@ -32,20 +32,18 @@ export function EpigramDetailHeader({
         </Button>
 
         {/* 작성자만 수정/삭제 가능 */}
-        {canEdit && (
+        {isAuthor && (
           <>
-            {onEdit && (
-              <Button variant="outline" size="sm" onClick={onEdit}>
+            <Link href={`/epigramlist/${epigramId}/edit`}>
+              <Button variant="outline" size="sm">
                 <Edit3 className="w-4 h-4 mr-1" />
                 수정
               </Button>
-            )}
-            {onDelete && (
-              <Button variant="outline" size="sm" onClick={onDelete}>
-                <Trash2 className="w-4 h-4 mr-1" />
-                삭제
-              </Button>
-            )}
+            </Link>
+            <Button variant="outline" size="sm" onClick={onDelete}>
+              <Trash2 className="w-4 h-4 mr-1" />
+              삭제
+            </Button>
           </>
         )}
       </div>

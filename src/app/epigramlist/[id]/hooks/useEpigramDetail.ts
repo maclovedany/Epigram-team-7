@@ -102,18 +102,18 @@ export function useEpigramDetail() {
   };
 
   // 작성자 여부 확인
-  const isAuthor = Boolean(user && epigram && user.id === epigram.writerId);
-
-  // 수정 가능 여부 확인
-  const canEdit = isAuthor;
+  const isAuthor = user && epigram && user.id === epigram.writerId;
 
   return {
+    // State
     epigram,
     isLoading,
     isLiking,
     error,
+    isAuthenticated,
     isAuthor,
-    canEdit,
+
+    // Handlers
     handleLike,
     handleDelete,
     handleShare,

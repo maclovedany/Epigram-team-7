@@ -1,78 +1,131 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { epigramService } from "@/lib/api";
-import { useAuthStore } from "@/store/authStore";
-import {
-  createEpigramSchema,
-  type CreateEpigramFormData,
-} from "@/lib/validations";
+import { epigramService } from "@/lib/services/epigramService";
+
+export interface EpigramFormData {
+  content: string;
+  authorType: string;
+  author: string;
+  referenceTitle: string;
+  referenceUrl: string;
+  tags: string[];
+}
+
+export interface ValidationErrors {
+  contentError: string;
+  authorError: string;
+  tagError: string;
+}
 
 export function useAddEpigram() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState<string>("");
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<CreateEpigramFormData>({
-    resolver: zodResolver(createEpigramSchema),
-    defaultValues: {
-      tags: [],
-    },
-  });
+  // Form state
+  const [content, setContent] = useState("");
+  const [authorType, setAuthorType] = useState("직접입력");
+  const [author, setAuthor] = useState("");
+  const [referenceTitle, setReferenceTitle] = useState("");
+  const [referenceUrl, setReferenceUrl] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const watchedContent = watch("content", "");
-  const watchedAuthor = watch("author", "");
+  // Validation
+  const contentError = content.length > 500 ? "500자 이내로 입력해주세요." : "";
+  const authorError =
+    authorType === "직접입력" && author.trim() === ""
+      ? "저자 이름을 입력해주세요."
+      : "";
+  const tagError =
+    tags.length > 3
+      ? "태그는 최대 3개까지 추가할 수 있습니다."
+      : tags.some((t) => t.length > 10)
+      ? "태그는 10자 이내여야 합니다."
+      : "";
 
-  // 로그인하지 않은 사용자는 리다이렉트
-  if (!isAuthenticated) {
-    router.push("/login");
-    return null;
-  }
+  const isFormInvalid =
+    !!contentError ||
+    !!authorError ||
+    !!tagError ||
+    content.trim() === "" ||
+    (authorType === "직접입력" && author.trim() === "");
 
-  const onSubmit = async (data: CreateEpigramFormData) => {
+  // Tag management
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+      e.preventDefault();
+      if (
+        tags.length < 3 &&
+        tagInput.length <= 10 &&
+        !tags.includes(tagInput)
+      ) {
+        setTags([...tags, tagInput]);
+        setTagInput("");
+      }
+    }
+  };
+
+  const handleTagRemove = (tag: string) =>
+    setTags(tags.filter((t) => t !== tag));
+
+  // Form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isFormInvalid) return;
+
+    setIsSubmitting(true);
     try {
-      setApiError("");
-      setIsSubmitting(true);
-
-      // 빈 URL은 제거
-      const submitData = {
-        ...data,
-        referenceUrl: data.referenceUrl?.trim() || undefined,
-        referenceTitle: data.referenceTitle?.trim() || undefined,
-      };
-
-      await epigramService.createEpigram(submitData);
-
-      // 성공 시 목록 페이지로 이동
+      const result = await epigramService.createEpigram({
+        content,
+        author: authorType === "직접입력" ? author : authorType,
+        referenceTitle,
+        referenceUrl,
+        tags,
+      });
       router.push("/epigramlist");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 오류가 발생했습니다.";
-      setApiError(errorMessage);
+    } catch (err) {
+      setError("에피그램 저장에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
-    register,
-    control,
-    handleSubmit,
-    errors,
+    // Form data
+    formData: {
+      content,
+      authorType,
+      author,
+      referenceTitle,
+      referenceUrl,
+      tags,
+      tagInput,
+    },
+
+    // Form setters
+    setContent,
+    setAuthorType,
+    setAuthor,
+    setReferenceTitle,
+    setReferenceUrl,
+    setTagInput,
+
+    // Validation
+    validation: {
+      contentError,
+      authorError,
+      tagError,
+      isFormInvalid,
+    },
+
+    // State
     isSubmitting,
-    apiError,
-    onSubmit,
-    watchedContent,
-    watchedAuthor,
+    error,
+
+    // Handlers
+    handleTagKeyDown,
+    handleTagRemove,
+    handleSubmit,
   };
 }
