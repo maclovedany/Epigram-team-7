@@ -29,12 +29,6 @@ export default function AddEpigramPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
-  // 로그인하지 않은 사용자는 리다이렉트
-  if (!isAuthenticated) {
-    router.push("/login");
-    return null;
-  }
-
   const {
     register,
     control,
@@ -50,6 +44,12 @@ export default function AddEpigramPage() {
 
   const watchedContent = watch("content", "");
   const watchedAuthor = watch("author", "");
+
+  // 로그인하지 않은 사용자는 리다이렉트
+  if (!isAuthenticated) {
+    router.push("/login");
+    return null;
+  }
 
   const onSubmit = async (data: CreateEpigramFormData) => {
     try {
@@ -67,8 +67,12 @@ export default function AddEpigramPage() {
 
       // 성공 시 목록 페이지로 이동
       router.push("/epigramlist");
-    } catch (error: any) {
-      setApiError(error.message);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "알 수 없는 오류가 발생했습니다.";
+      setApiError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

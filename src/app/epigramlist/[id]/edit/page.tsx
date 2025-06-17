@@ -32,7 +32,7 @@ export default function EditEpigramPage() {
 
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { user } = useAuthStore();
 
   const epigramId = params.id as string;
 
@@ -41,8 +41,8 @@ export default function EditEpigramPage() {
     control,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
+    reset,
   } = useForm<CreateEpigramFormData>({
     resolver: zodResolver(createEpigramSchema),
     defaultValues: {
@@ -53,46 +53,43 @@ export default function EditEpigramPage() {
   const watchedContent = watch("content", "");
   const watchedAuthor = watch("author", "");
 
-  // 에피그램 데이터 로드 및 폼 초기화
-  const loadEpigram = async () => {
-    try {
-      setIsLoading(true);
-      setApiError("");
-
-      const data = await epigramService.getEpigramById(epigramId);
-      setEpigram(data);
-
-      // 작성자 권한 체크
-      if (!user || user.id !== data.writerId) {
-        setApiError("이 에피그램을 수정할 권한이 없습니다.");
-        return;
-      }
-
-      // 폼에 기존 데이터 설정
-      setValue("content", data.content);
-      setValue("author", data.author);
-      setValue("referenceTitle", data.referenceTitle || "");
-      setValue("referenceUrl", data.referenceUrl || "");
-      setValue("tags", data.tags || []);
-    } catch (err: any) {
-      setApiError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // 에피그램 로드
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
+    const loadEpigramData = async () => {
+      if (!epigramId) return;
 
-    if (epigramId) {
-      loadEpigram();
-    }
-  }, [epigramId, isAuthenticated, user]);
+      try {
+        setIsLoading(true);
+        const data = await epigramService.getEpigramById(epigramId);
 
-  // 수정 제출
+        // 현재 사용자가 작성자인지 확인
+        if (!user || user.id !== data.writerId) {
+          router.push("/epigramlist");
+          return;
+        }
+
+        setEpigram(data);
+        // 폼에 기존 데이터 설정
+        reset({
+          content: data.content,
+          author: data.author,
+          referenceUrl: data.referenceUrl || "",
+          referenceTitle: data.referenceTitle || "",
+          tags: data.tags || [],
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "에피그램을 불러올 수 없습니다.";
+        setApiError(errorMessage);
+        router.push("/epigramlist");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEpigramData();
+  }, [epigramId, user, router, reset]);
+
   const onSubmit = async (data: CreateEpigramFormData) => {
     if (!epigram) return;
 
@@ -107,12 +104,14 @@ export default function EditEpigramPage() {
         referenceTitle: data.referenceTitle?.trim() || undefined,
       };
 
-      await epigramService.updateEpigram(epigramId, submitData);
+      await epigramService.updateEpigram(epigram.id.toString(), submitData);
 
       // 성공 시 상세 페이지로 이동
-      router.push(`/epigramlist/${epigramId}`);
-    } catch (error: any) {
-      setApiError(error.message);
+      router.push(`/epigramlist/${epigram.id}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "수정에 실패했습니다.";
+      setApiError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

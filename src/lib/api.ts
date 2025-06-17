@@ -81,11 +81,46 @@ export const epigramService = {
         endpoints.epigrams,
         { params }
       );
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "에피그램을 불러오는데 실패했습니다."
-      );
+
+      // 응답 데이터 검증
+      if (!response.data) {
+        throw new Error("서버 응답이 올바르지 않습니다.");
+      }
+
+      const data = response.data.data;
+
+      // 데이터 구조 검증 및 기본값 설정
+      if (!data) {
+        return {
+          list: [],
+          totalCount: 0,
+          nextCursor: undefined,
+        };
+      }
+
+      return {
+        list: Array.isArray(data.list) ? data.list : [],
+        totalCount: typeof data.totalCount === "number" ? data.totalCount : 0,
+        nextCursor: data.nextCursor,
+      };
+    } catch (error) {
+      // axios 에러 처리
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      const axiosError = error as any;
+      let message = "에피그램을 불러오는데 실패했습니다.";
+
+      if (axiosError.response?.data?.message) {
+        message = axiosError.response.data.message;
+      } else if (axiosError.response?.status) {
+        message = `서버 오류 (${axiosError.response.status})`;
+      } else if (axiosError.message) {
+        message = axiosError.message;
+      }
+
+      throw new Error(message);
     }
   },
 
@@ -96,10 +131,12 @@ export const epigramService = {
         endpoints.epigramById(id)
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "에피그램을 불러오는데 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "에피그램을 불러오는데 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -111,10 +148,12 @@ export const epigramService = {
         data
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "에피그램 작성에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "에피그램 작성에 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -129,10 +168,12 @@ export const epigramService = {
         data
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "에피그램 수정에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "에피그램 수정에 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -140,10 +181,12 @@ export const epigramService = {
   deleteEpigram: async (id: string): Promise<void> => {
     try {
       await api.delete(endpoints.epigramById(id));
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "에피그램 삭제에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "에피그램 삭제에 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -156,10 +199,10 @@ export const epigramService = {
         ApiResponse<{ isLiked: boolean; likeCount: number }>
       >(endpoints.likes(id));
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "좋아요 처리에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "좋아요 처리에 실패했습니다.";
+      throw new Error(message);
     }
   },
 };
@@ -179,10 +222,12 @@ export const commentService = {
         { params }
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "댓글을 불러오는데 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "댓글을 불러오는데 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -197,10 +242,10 @@ export const commentService = {
         data
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "댓글 작성에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "댓글 작성에 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -216,10 +261,10 @@ export const commentService = {
         data
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "댓글 수정에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "댓글 수정에 실패했습니다.";
+      throw new Error(message);
     }
   },
 
@@ -230,10 +275,10 @@ export const commentService = {
   ): Promise<void> => {
     try {
       await api.delete(`${endpoints.comments(epigramId)}/${commentId}`);
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "댓글 삭제에 실패했습니다."
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "댓글 삭제에 실패했습니다.";
+      throw new Error(message);
     }
   },
 };
@@ -243,45 +288,71 @@ export const authService = {
   // 로그인
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      const response = await api.post<ApiResponse<AuthResponse>>(
-        endpoints.login,
-        credentials
-      );
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "로그인에 실패했습니다."
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "로그인에 실패했습니다.");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error instanceof Error
+        ? error
+        : new Error("로그인 중 오류가 발생했습니다.");
     }
   },
 
   // 회원가입
-  signup: async (userData: SignupRequest): Promise<AuthResponse> => {
+  signup: async (data: SignupRequest): Promise<AuthResponse> => {
     try {
-      const response = await api.post<ApiResponse<AuthResponse>>(
-        endpoints.signup,
-        userData
-      );
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "회원가입에 실패했습니다."
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "회원가입에 실패했습니다.");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error instanceof Error
+        ? error
+        : new Error("회원가입 중 오류가 발생했습니다.");
     }
   },
 
   // 토큰 갱신
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     try {
-      const response = await api.post<ApiResponse<AuthResponse>>(
-        endpoints.refresh,
-        { refreshToken }
-      );
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || "토큰 갱신에 실패했습니다."
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error("토큰 갱신에 실패했습니다.");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error instanceof Error
+        ? error
+        : new Error("토큰 갱신 중 오류가 발생했습니다.");
     }
   },
 
