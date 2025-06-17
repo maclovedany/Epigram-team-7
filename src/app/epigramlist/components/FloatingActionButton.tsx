@@ -12,10 +12,10 @@ export const FloatingActionButton = ({
   return (
     <Link
       href="/addepigram"
-      className="fixed bottom-6 right-6 bg-gray-800 text-white p-4 rounded-full shadow-lg hover:bg-gray-700 transition-colors z-50 inline-flex items-center"
+      className="fixed bottom-6 right-6 bg-gray-800 text-white p-4 h-16 w-[194px] rounded-full shadow-lg hover:bg-gray-700 transition-colors z-50 inline-flex items-center justify-center"
     >
       <span className="text-xl">+</span>
-      <span className="ml-2 text-sm">에피그램 만들기</span>
+      <span className="ml-2 text-[15px]">에피그램 만들기</span>
     </Link>
   );
 };

@@ -4,36 +4,36 @@ import { LoginRequest, SignupRequest, AuthResponse } from "@/types";
 export const authService = {
   // 로그인
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-    try {
-      const response = await api.post<AuthResponse>(
-        "/auth/signin",
-        credentials
-      );
-      return response.data;
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "로그인 중 오류가 발생했습니다.";
-      throw new Error(message);
-    }
+    // 목업: 항상 로그인 성공
+    return {
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+      user: {
+        id: 1,
+        email: credentials.email,
+        nickname: "MockUser",
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        image: undefined,
+      },
+    };
   },
 
   // 회원가입
   signup: async (data: SignupRequest): Promise<AuthResponse> => {
-    try {
-      const response = await api.post<AuthResponse>(
-        "/14-차경훈/auth/signUp",
-        data
-      );
-      return response.data;
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "회원가입 중 오류가 발생했습니다.";
-      throw new Error(message);
-    }
+    // 목업: 항상 회원가입 성공
+    return {
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+      user: {
+        id: 2,
+        email: data.email,
+        nickname: data.nickname,
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        image: undefined,
+      },
+    };
   },
 
   // 토큰 갱신
