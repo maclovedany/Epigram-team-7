@@ -96,12 +96,12 @@ export function AuthForm<T extends z.ZodSchema>({
       </Button>
 
       {/* 링크 */}
-      <div className="text-center">
+      <div className="text-right">
         <p className="text-sm text-[#BFC6D1]">
           {linkDescription}{" "}
           <Link
             href={linkHref}
-            className="text-[#BFC6D1] hover:text-[#A7B2C5] font-medium"
+            className="text-black hover:text-[#A7B2C5] font-medium"
           >
             {linkText}
           </Link>
