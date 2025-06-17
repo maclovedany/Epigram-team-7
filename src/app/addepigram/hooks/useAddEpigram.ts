@@ -76,7 +76,7 @@ export function useAddEpigram() {
 
     setIsSubmitting(true);
     try {
-      const result = await epigramService.createEpigram({
+      await epigramService.createEpigram({
         content,
         author: authorType === "직접입력" ? author : authorType,
         referenceTitle,
@@ -84,7 +84,7 @@ export function useAddEpigram() {
         tags,
       });
       router.push("/epigramlist");
-    } catch (err) {
+    } catch {
       setError("에피그램 저장에 실패했습니다.");
     } finally {
       setIsSubmitting(false);

@@ -109,7 +109,13 @@ export const epigramService = {
         throw error;
       }
 
-      const axiosError = error as any;
+      const axiosError = error as {
+        response?: {
+          data?: { message?: string };
+          status?: number;
+        };
+        message?: string;
+      };
       let message = "에피그램을 불러오는데 실패했습니다.";
 
       if (axiosError.response?.data?.message) {

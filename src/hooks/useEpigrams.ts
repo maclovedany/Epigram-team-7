@@ -99,7 +99,7 @@ export const useEpigrams = () => {
 
   useEffect(() => {
     loadEpigrams(false);
-  }, []);
+  }, [loadEpigrams]);
 
   return {
     epigrams,

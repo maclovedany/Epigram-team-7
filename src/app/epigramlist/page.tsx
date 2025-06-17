@@ -1,15 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import Header from "@/components/layout/Header";
-import { useAuthStore } from "@/store/authStore";
-import { epigramService } from "@/lib/api";
-import { Epigram } from "@/types";
 import { LoadMoreButton, FloatingActionButton } from "./components";
 import { useRouter } from "next/navigation";
-
-const ITEMS_PER_LOAD = 6;
 
 const MOCK_EPIGRAMS = Array.from({ length: 20 }).map((_, i) => ({
   id: i + 1,

@@ -29,7 +29,7 @@ export default function EpigramDetailContent({
       <CardContent className="p-8">
         {/* 에피그램 내용 */}
         <blockquote className="text-2xl font-medium leading-relaxed text-text-primary mb-6 text-center italic">
-          "{epigram.content}"
+          &ldquo;{epigram.content}&rdquo;
         </blockquote>
 
         {/* 작가 정보 */}

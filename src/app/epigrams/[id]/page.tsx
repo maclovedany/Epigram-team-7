@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Header from "@/components/layout/Header";
 import { epigramService } from "@/lib/services/epigramService";
 
@@ -31,9 +32,6 @@ const MOCK_COMMENTS = Array.from({ length: 12 }).map((_, i) => ({
 
 export default function EpigramDetailPage() {
   const router = useRouter();
-  const params = useParams();
-  const [copied, setCopied] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(MOCK_COMMENTS.slice(0, 3));
@@ -42,13 +40,6 @@ export default function EpigramDetailPage() {
   const loaderRef = useRef<HTMLDivElement>(null);
   const [likeCount, setLikeCount] = useState(MOCK_EPIGRAM.likeCount);
   const [isLiked, setIsLiked] = useState(false);
-
-  // 공유 버튼
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   // 무한스크롤(IntersectionObserver)
   useEffect(() => {
@@ -92,7 +83,7 @@ export default function EpigramDetailPage() {
       const result = await epigramService.toggleLike(MOCK_EPIGRAM.id, isLiked);
       setLikeCount(result.likeCount);
       setIsLiked(result.isLiked);
-    } catch (e) {
+    } catch {
       // 에러 처리 필요시 추가
     }
   };
@@ -132,7 +123,13 @@ export default function EpigramDetailPage() {
               style={{ color: "#fff" }}
               onClick={handleLike}
             >
-              <img src="/like.png" alt="like" className="w-5 h-5 mr-2" />
+              <Image
+                src="/like.png"
+                alt="like"
+                width={20}
+                height={20}
+                className="w-5 h-5 mr-2"
+              />
               <span className="font-semibold text-white">{likeCount}</span>
             </button>
             {MOCK_EPIGRAM.referenceUrl && (
@@ -143,7 +140,13 @@ export default function EpigramDetailPage() {
                 className="inline-flex items-center px-4 py-2 rounded-full border border-[#CFDBEA] bg-[#f5f6fa] text-gray-700 ml-2"
               >
                 <span>왕도로 가는 길</span>
-                <img src="/md.png" alt="arrow" className="w-5 h-5 ml-2" />
+                <Image
+                  src="/md.png"
+                  alt="arrow"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 ml-2"
+                />
               </a>
             )}
           </div>
@@ -156,9 +159,11 @@ export default function EpigramDetailPage() {
             className="mb-6 flex items-center gap-3"
           >
             {/* 프로필 이미지 */}
-            <img
+            <Image
               src="/profile1.png"
               alt="내 프로필"
+              width={36}
+              height={36}
               className="w-9 h-9 rounded-full object-cover"
             />
             <input
@@ -176,9 +181,11 @@ export default function EpigramDetailPage() {
                   onClick={() => setShowProfile(c.user.id)}
                   className="flex-shrink-0"
                 >
-                  <img
+                  <Image
                     src={c.user.image}
                     alt={c.user.nickname}
+                    width={36}
+                    height={36}
                     className="w-9 h-9 rounded-full object-cover"
                   />
                 </button>
@@ -247,12 +254,14 @@ export default function EpigramDetailPage() {
         {showProfile && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
             <div className="bg-white rounded-lg p-8 shadow-xl w-80 text-center">
-              <img
+              <Image
                 src={
                   MOCK_COMMENTS.find((c) => c.user.id === showProfile)?.user
-                    .image
+                    .image || "/profile1.png"
                 }
                 alt="프로필"
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-full mx-auto mb-3"
               />
               <div className="font-bold text-lg mb-1">

@@ -2,11 +2,12 @@ import { Epigram } from "@/types";
 
 interface EpigramCardProps {
   epigram: Epigram;
+  onClick?: () => void;
 }
 
-export function EpigramCard({ epigram }: EpigramCardProps) {
+export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 cursor-pointer" onClick={onClick}>
       {/* 에피그램 카드 */}
       <div
         className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"

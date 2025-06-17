@@ -20,5 +20,9 @@ export {
 } from "./Card";
 export type { CardProps } from "./Card";
 
+export { default as LoadingSpinner } from "./LoadingSpinner";
+export { default as ErrorMessage } from "./ErrorMessage";
+export { default as EmptyState } from "./EmptyState";
+
 // Epigram Components
 export { default as CommentSection } from "../epigram/CommentSection";

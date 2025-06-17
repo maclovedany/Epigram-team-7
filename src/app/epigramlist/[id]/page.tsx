@@ -35,7 +35,7 @@ export default function EpigramDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           <EpigramDetailHeader
-            isAuthor={isAuthor}
+            isAuthor={!!isAuthor}
             onShare={handleShare}
             onDelete={handleDelete}
             epigramId={epigram.id.toString()}

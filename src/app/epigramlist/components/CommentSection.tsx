@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send, Trash2, Edit, X, Check } from "lucide-react";
@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 import { commentService } from "@/lib/services";
 import { useAuthStore } from "@/store/authStore";
-import { Comment, CreateCommentRequest } from "@/types";
+import { Comment } from "@/types";
 import { createCommentSchema } from "@/lib/validations";
 
 interface CommentSectionProps {
@@ -37,7 +37,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   });
 
   // 댓글 목록 로드
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
@@ -52,7 +52,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [epigramId]);
 
   // 댓글 작성
   const onSubmit = async (data: CommentFormData) => {
@@ -117,7 +117,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
   useEffect(() => {
     loadComments();
-  }, [epigramId]);
+  }, [epigramId, loadComments]);
 
   return (
     <div className="space-y-6">
