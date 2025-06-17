@@ -1,0 +1,1 @@
+export { useEpigramList } from "./useEpigramList";

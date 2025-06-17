@@ -1,0 +1,1 @@
+export { useEpigramDetail } from "./useEpigramDetail";
