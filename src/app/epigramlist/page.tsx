@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/authStore";
 import { epigramService } from "@/lib/api";
 import { Epigram } from "@/types";
 import { LoadMoreButton, FloatingActionButton } from "./components";
+import { useRouter } from "next/navigation";
 
 const ITEMS_PER_LOAD = 6;
 
@@ -23,6 +24,7 @@ export default function EpigramListPage() {
   const isAuthenticated = true;
   const isLoading = false; // 목업이므로 항상 false
   const hasMore = visibleCount < MOCK_EPIGRAMS.length;
+  const router = useRouter();
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => Math.min(prev + 10, MOCK_EPIGRAMS.length));
@@ -37,7 +39,11 @@ export default function EpigramListPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {epigrams.map((epigram) => (
-            <div key={epigram.id} className="space-y-3">
+            <div
+              key={epigram.id}
+              className="space-y-3 cursor-pointer"
+              onClick={() => router.push(`/epigrams/${epigram.id}`)}
+            >
               <div
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 relative"
                 style={{

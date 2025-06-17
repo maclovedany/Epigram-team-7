@@ -151,18 +151,13 @@ export const epigramService = {
   },
 
   // 좋아요 토글
-  toggleLike: async (
-    id: string
-  ): Promise<{ isLiked: boolean; likeCount: number }> => {
-    try {
-      const response = await api.post<
-        ApiResponse<{ isLiked: boolean; likeCount: number }>
-      >(`/${TEAM_ID}/epigrams/${id}/likes`);
-      return response.data.data;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "좋아요 처리에 실패했습니다.";
-      throw new Error(message);
-    }
+  toggleLike: async (id: number, isLiked: boolean) => {
+    const url = `https://fe-project-epigram-api.vercel.app/14-차경훈/epigrams/${id}/like`;
+    const response = await fetch(url, {
+      method: isLiked ? "DELETE" : "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error("좋아요 처리에 실패했습니다.");
+    return response.json(); // { likeCount, isLiked, ... }
   },
 };
