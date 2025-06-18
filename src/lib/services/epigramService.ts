@@ -29,10 +29,17 @@ export const epigramService = {
         throw new Error("서버 응답이 올바르지 않습니다.");
       }
 
-      const data = response.data.data;
-
-      // 데이터 구조 검증 및 기본값 설정
-      if (!data) {
+      // 응답 구조 확인: response.data.data가 있는지 또는 response.data가 직접 데이터인지
+      let data: any;
+      if ((response.data as any).data) {
+        // ApiResponse<T> 구조: { data: T }
+        data = (response.data as any).data;
+        console.log("중첩된 데이터 구조 사용:", data);
+      } else if ((response.data as any).list !== undefined) {
+        // 직접 데이터 구조: { list, totalCount, nextCursor }
+        data = response.data as any;
+        console.log("직접 데이터 구조 사용:", data);
+      } else {
         console.log("데이터가 없음, 빈 배열 반환");
         return {
           list: [],
@@ -82,11 +89,47 @@ export const epigramService = {
   // 에피그램 상세 조회
   getEpigramById: async (id: string): Promise<Epigram> => {
     try {
-      const response = await api.get<ApiResponse<Epigram>>(
-        `/${TEAM_ID}/epigrams/${id}`
-      );
-      return response.data.data;
+      console.log("에피그램 상세 조회 요청:", `/${TEAM_ID}/epigrams/${id}`);
+      const response = await api.get<Epigram>(`/${TEAM_ID}/epigrams/${id}`);
+
+      console.log("에피그램 상세 응답:", response.data);
+
+      // 응답 구조 확인 및 처리
+      if (
+        response.data &&
+        typeof response.data === "object" &&
+        "id" in response.data
+      ) {
+        // 직접 에피그램 객체가 반환된 경우
+        console.log("에피그램 상세 데이터:", response.data);
+        return response.data as Epigram;
+      } else if (response.data && (response.data as any).data) {
+        // ApiResponse 구조인 경우
+        console.log("중첩된 에피그램 데이터:", (response.data as any).data);
+        return (response.data as any).data;
+      } else {
+        console.error("예상치 못한 응답 구조:", response.data);
+        throw new Error("서버 응답 구조가 올바르지 않습니다.");
+      }
     } catch (error) {
+      console.error("에피그램 상세 조회 실패:", error);
+
+      // axios 에러 처리
+      const axiosError = error as any;
+      if (axiosError.response) {
+        console.error("응답 데이터:", axiosError.response.data);
+        console.error("응답 상태:", axiosError.response.status);
+
+        if (axiosError.response.status === 404) {
+          throw new Error("요청한 에피그램이 존재하지 않습니다.");
+        }
+
+        const message =
+          axiosError.response.data?.message ||
+          `서버 오류 (${axiosError.response.status})`;
+        throw new Error(message);
+      }
+
       const message =
         error instanceof Error
           ? error.message

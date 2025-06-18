@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/components/layout/Header";
 import CommentSection from "@/components/epigram/CommentSection";
 import {
   EpigramDetailHeader,
@@ -31,25 +32,25 @@ export default function EpigramDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <EpigramDetailHeader
-            isAuthor={!!isAuthor}
-            onShare={handleShare}
-            onDelete={handleDelete}
-            epigramId={epigram.id.toString()}
-          />
+    <div className="min-h-screen">
+      <Header />
 
-          <EpigramDetailContent
-            epigram={epigram}
-            isAuthenticated={isAuthenticated}
-            isLiking={isLiking}
-            onLike={handleLike}
-          />
+      {/* 메인 콘텐츠 */}
+      <div>
+        <EpigramDetailContent
+          epigram={epigram}
+          isAuthenticated={isAuthenticated}
+          isAuthor={!!isAuthor}
+          isLiking={isLiking}
+          onLike={handleLike}
+          onEdit={() => {
+            // TODO: 수정 페이지로 이동
+            window.location.href = `/epigramlist/${epigram.id}/edit`;
+          }}
+          onDelete={handleDelete}
+        />
 
-          <CommentSection epigramId={epigram.id.toString()} />
-        </div>
+        <CommentSection epigramId={epigram.id.toString()} />
       </div>
     </div>
   );

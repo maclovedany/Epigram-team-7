@@ -143,152 +143,170 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   };
 
   return (
-    <Card id="comments">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="w-5 h-5" />
-          댓글 ({comments.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* 댓글 작성 폼 */}
-        {isAuthenticated ? (
-          <form onSubmit={handleSubmit(onSubmitComment)} className="space-y-3">
-            <Textarea
-              placeholder="댓글을 작성해주세요..."
-              rows={3}
-              error={errors.content?.message}
-              {...register("content")}
-            />
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                size="sm"
-                isLoading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                <Send className="w-4 h-4 mr-1" />
-                댓글 작성
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <div className="text-center py-6 text-text-secondary">
-            <p>댓글을 작성하려면 로그인이 필요합니다.</p>
-          </div>
-        )}
-
-        {/* 에러 메시지 */}
-        {error && (
-          <div className="p-3 text-sm text-error bg-red-50 border border-red-200 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        {/* 댓글 목록 */}
-        <div className="space-y-4">
-          {isLoading ? (
-            // 로딩 스켈레톤
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className="p-4 border border-gray-200 rounded-lg animate-pulse"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
-                  </div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+    <div className="w-full bg-gray-100 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-transparent p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-6">
+            댓글 ({comments.length})
+          </h3>
+          {/* 댓글 작성 폼 */}
+          {isAuthenticated ? (
+            <form
+              onSubmit={handleSubmit(onSubmitComment)}
+              className="mb-6 bg-gray-50 p-4 rounded-lg"
+            >
+              <div className="flex gap-3">
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-gray-600" />
                 </div>
-              ))}
-            </div>
-          ) : comments.length > 0 ? (
-            comments.map((comment) => (
-              <div
-                key={comment.id}
-                className="p-4 border border-gray-200 rounded-lg"
-              >
-                {/* 댓글 헤더 */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-primary-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">
-                        {comment.writer.nickname}
-                      </p>
-                      <p className="text-xs text-text-tertiary">
-                        {formatDate(comment.createdAt)}
-                      </p>
-                    </div>
+                <div className="flex-1">
+                  <Textarea
+                    placeholder="100자 이내로 입력해주세요."
+                    rows={2}
+                    className="resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    error={errors.content?.message}
+                    {...register("content")}
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button
+                      type="submit"
+                      size="sm"
+                      isLoading={isSubmitting}
+                      disabled={isSubmitting}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+                    >
+                      등록
+                    </Button>
                   </div>
-
-                  {/* 댓글 작성자만 수정/삭제 가능 */}
-                  {user && user.id === comment.writer.id && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => startEdit(comment)}
-                        className="p-1 text-text-tertiary hover:text-text-secondary"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => deleteComment(comment.id)}
-                        className="p-1 text-text-tertiary hover:text-error"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
                 </div>
-
-                {/* 댓글 내용 */}
-                {editingId === comment.id ? (
-                  // 수정 모드
-                  <form
-                    onSubmit={handleEditSubmit(onEditComment)}
-                    className="space-y-3"
-                  >
-                    <Textarea
-                      rows={2}
-                      error={editErrors.content?.message}
-                      {...editRegister("content")}
-                    />
-                    <div className="flex gap-2">
-                      <Button type="submit" size="sm" variant="primary">
-                        저장
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={cancelEdit}
-                      >
-                        취소
-                      </Button>
-                    </div>
-                  </form>
-                ) : (
-                  // 일반 표시 모드
-                  <p className="text-sm text-text-primary leading-relaxed">
-                    {comment.content}
-                  </p>
-                )}
               </div>
-            ))
+            </form>
           ) : (
-            // 빈 상태
-            <div className="text-center py-8 text-text-secondary">
-              <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>아직 댓글이 없습니다.</p>
-              <p className="text-sm">첫 번째 댓글을 작성해보세요!</p>
+            <div className="text-center py-6 text-gray-500">
+              <p>댓글을 작성하려면 로그인이 필요합니다.</p>
             </div>
           )}
+
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+
+          {/* 댓글 목록 */}
+          <div className="space-y-4">
+            {isLoading ? (
+              // 로딩 스켈레톤
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="p-4 border border-gray-200 rounded-lg animate-pulse"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-20"></div>
+                      <div className="h-3 bg-gray-200 rounded w-16"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            ) : comments.length > 0 ? (
+              comments.map((comment) => (
+                <div
+                  key={comment.id}
+                  className="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:mb-0"
+                >
+                  <div className="flex gap-3">
+                    {/* 프로필 이미지 */}
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-gray-500" />
+                    </div>
+
+                    {/* 댓글 내용 */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-900">
+                          {comment.writer.nickname}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(comment.createdAt)}
+                        </span>
+
+                        {/* 댓글 작성자만 수정/삭제 가능 */}
+                        {user && user.id === comment.writer.id && (
+                          <div className="flex items-center gap-1 ml-auto">
+                            <button
+                              onClick={() => startEdit(comment)}
+                              className="text-xs text-blue-600 hover:text-blue-800"
+                            >
+                              수정
+                            </button>
+                            <span className="text-xs text-gray-300">|</span>
+                            <button
+                              onClick={() => deleteComment(comment.id)}
+                              className="text-xs text-red-600 hover:text-red-800"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 댓글 텍스트 */}
+                      {editingId === comment.id ? (
+                        // 수정 모드
+                        <form
+                          onSubmit={handleEditSubmit(onEditComment)}
+                          className="space-y-2"
+                        >
+                          <Textarea
+                            rows={2}
+                            className="text-sm"
+                            error={editErrors.content?.message}
+                            {...editRegister("content")}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              type="submit"
+                              size="sm"
+                              className="text-xs px-3 py-1"
+                            >
+                              저장
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="text-xs px-3 py-1"
+                              onClick={cancelEdit}
+                            >
+                              취소
+                            </Button>
+                          </div>
+                        </form>
+                      ) : (
+                        // 일반 표시 모드
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {comment.content}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // 빈 상태
+              <div className="text-center py-8 text-gray-500">
+                <p>아직 댓글이 없습니다.</p>
+                <p className="text-sm">첫 번째 댓글을 작성해보세요!</p>
+              </div>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
