@@ -15,6 +15,7 @@ export default function EditForm() {
     error,
     handleTagKeyDown,
     handleTagRemove,
+    handleTagInputChange,
     handleSubmit,
   } = useEditEpigram();
 
@@ -101,13 +102,15 @@ export default function EditForm() {
         <input
           className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
           value={formData.tagInput}
-          onChange={(e) =>
-            setTagInput(e.target.value.replace(/[^\w가-힣]/g, "").slice(0, 10))
-          }
+          onChange={(e) => handleTagInputChange(e.target.value)}
           onKeyDown={handleTagKeyDown}
-          placeholder="입력하여 태그 작성 (최대 10자, 최대 3개)"
+          placeholder="입력하여 태그 작성 (Enter 또는 쉼표로 추가, 최대 10자, 최대 3개)"
           disabled={formData.tags.length >= 3}
         />
+        <div className="text-xs text-gray-500 mt-1">
+          Enter 키 또는 쉼표(,)를 눌러 태그를 추가하세요. (
+          {formData.tags.length}/3개)
+        </div>
         {validation.tagError && (
           <div className="text-red-500 text-xs mt-1">{validation.tagError}</div>
         )}
@@ -120,7 +123,7 @@ export default function EditForm() {
         </div>
       )}
 
-      {/* 저장 버튼 */}
+      {/* 수정 완료 버튼 */}
       <button
         type="submit"
         className="w-full h-12 rounded-lg bg-[#CBD3E1] text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed"

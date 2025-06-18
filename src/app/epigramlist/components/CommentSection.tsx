@@ -55,8 +55,20 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   }, [epigramId]);
 
   // 댓글 작성
-  const onSubmit = async (data: CommentFormData) => {
+  const onSubmitComment = async (data: CommentFormData) => {
     try {
+      // 인증 상태 확인
+      console.log("댓글 작성 시 user:", user);
+      console.log("댓글 작성 시 isAuthenticated:", isAuthenticated);
+      console.log(
+        "댓글 작성 시 localStorage 토큰:",
+        localStorage.getItem("authToken")
+      );
+      console.log(
+        "댓글 작성 시 sessionStorage 토큰:",
+        sessionStorage.getItem("authToken")
+      );
+
       const newComment = await commentService.createComment(epigramId, {
         content: data.content,
       });
@@ -127,7 +139,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             댓글 작성
           </h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmitComment)} className="space-y-4">
             <Textarea
               placeholder="댓글을 입력해주세요..."
               rows={3}

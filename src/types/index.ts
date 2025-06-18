@@ -60,17 +60,20 @@ export interface CreateEpigramRequest {
 export interface Comment {
   id: number;
   content: string;
+  epigramId: number;
   writer: {
     id: number;
     nickname: string;
     image?: string;
   };
+  isPrivate: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateCommentRequest {
   content: string;
+  isPrivate?: boolean;
 }
 
 // API Response Types

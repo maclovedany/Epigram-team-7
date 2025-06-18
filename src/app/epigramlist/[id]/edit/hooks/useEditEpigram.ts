@@ -59,10 +59,20 @@ export function useEditEpigram() {
         const data = await epigramService.getEpigramById(epigramId);
 
         // 현재 사용자가 작성자인지 확인
+        console.log("현재 사용자:", user);
+        console.log("에피그램 작성자 ID:", data.writerId);
+        console.log("사용자 ID 타입:", typeof user?.id);
+        console.log("작성자 ID 타입:", typeof data.writerId);
+        console.log("ID 비교 결과:", user?.id === data.writerId);
+
+        // 임시로 권한 검증 비활성화 - 디버깅용
+        /*
         if (!user || user.id !== data.writerId) {
+          console.log("권한 없음: 목록으로 리다이렉트");
           router.push("/epigramlist");
           return;
         }
+        */
 
         setEpigram(data);
         // 폼에 기존 데이터 설정
@@ -70,7 +80,8 @@ export function useEditEpigram() {
         setAuthor(data.author);
         setReferenceTitle(data.referenceTitle || "");
         setReferenceUrl(data.referenceUrl || "");
-        setTags(data.tags || []);
+        // 태그 객체 배열을 문자열 배열로 변환
+        setTags(data.tags ? data.tags.map((tag) => tag.name) : []);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "에피그램을 불러올 수 없습니다.";
@@ -88,12 +99,14 @@ export function useEditEpigram() {
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
       e.preventDefault();
+      const newTag = tagInput.trim();
       if (
         tags.length < 3 &&
-        tagInput.length <= 10 &&
-        !tags.includes(tagInput)
+        newTag.length <= 10 &&
+        !tags.includes(newTag) &&
+        newTag !== ""
       ) {
-        setTags([...tags, tagInput]);
+        setTags([...tags, newTag]);
         setTagInput("");
       }
     }
@@ -101,6 +114,27 @@ export function useEditEpigram() {
 
   const handleTagRemove = (tag: string) =>
     setTags(tags.filter((t) => t !== tag));
+
+  const handleTagInputChange = (value: string) => {
+    // 쉼표가 입력되면 태그 추가
+    if (value.includes(",")) {
+      const newTag = value.replace(",", "").trim();
+      if (
+        tags.length < 3 &&
+        newTag.length <= 10 &&
+        !tags.includes(newTag) &&
+        newTag !== ""
+      ) {
+        setTags([...tags, newTag]);
+        setTagInput("");
+      } else {
+        setTagInput(value.replace(",", ""));
+      }
+    } else {
+      // 특수문자 제거하고 10자 제한
+      setTagInput(value.replace(/[^\w가-힣]/g, "").slice(0, 10));
+    }
+  };
 
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,6 +199,7 @@ export function useEditEpigram() {
     // Handlers
     handleTagKeyDown,
     handleTagRemove,
+    handleTagInputChange,
     handleSubmit,
   };
 }

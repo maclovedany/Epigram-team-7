@@ -120,12 +120,24 @@ export default function EpigramDetailContent({
 
             {/* 출처 버튼 */}
             {(epigram.referenceTitle || epigram.referenceUrl) && (
-              <div className="flex items-center gap-2 px-4 py-2 h-10 bg-gray-100 text-gray-700 rounded-full">
+              <button
+                onClick={() => {
+                  if (epigram.referenceUrl) {
+                    // URL이 http:// 또는 https://로 시작하지 않으면 추가
+                    const url = epigram.referenceUrl.startsWith("http")
+                      ? epigram.referenceUrl
+                      : `https://${epigram.referenceUrl}`;
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 h-10 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+                disabled={!epigram.referenceUrl}
+              >
                 <span className="text-sm">
                   {epigram.referenceTitle || "출처"}
                 </span>
                 <img src="/md.png" alt="출처" className="w-4 h-4 filter-none" />
-              </div>
+              </button>
             )}
           </div>
         </div>

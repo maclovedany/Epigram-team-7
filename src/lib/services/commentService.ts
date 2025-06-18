@@ -23,6 +23,7 @@ export const commentService = {
       const url = `/${TEAM_ID}/comments`;
       console.log("댓글 조회 URL:", url);
       console.log("댓글 조회 파라미터:", params);
+      console.log("요청할 에피그램 ID:", epigramId);
 
       const response = await api.get<ApiResponse<PaginatedResponse<Comment>>>(
         url,
@@ -31,18 +32,42 @@ export const commentService = {
 
       console.log("댓글 조회 응답:", response.data);
 
+      let result;
       // API 문서에 따르면 직접 페이지네이션 객체를 반환할 수도 있음
       if (response.data && response.data.data) {
-        return response.data.data;
+        result = response.data.data;
       } else if (response.data && "list" in response.data) {
-        return response.data as unknown as PaginatedResponse<Comment>;
+        result = response.data as unknown as PaginatedResponse<Comment>;
       } else {
-        return {
+        result = {
           list: [],
           totalCount: 0,
           nextCursor: undefined,
         };
       }
+
+      console.log("댓글 조회 결과:", result);
+      console.log(
+        "조회된 댓글들의 epigramId:",
+        result.list.map((comment) => comment.epigramId)
+      );
+
+      // 클라이언트 측에서 epigramId로 필터링
+      const targetEpigramId = parseInt(epigramId);
+      const filteredComments = result.list.filter(
+        (comment) => comment.epigramId === targetEpigramId
+      );
+
+      console.log(
+        `에피그램 ID ${targetEpigramId}에 대한 필터링된 댓글:`,
+        filteredComments
+      );
+
+      return {
+        list: filteredComments,
+        totalCount: filteredComments.length,
+        nextCursor: result.nextCursor,
+      };
     } catch (error) {
       console.error("댓글 조회 실패:", error);
       const axiosError = error as any;
@@ -66,6 +91,24 @@ export const commentService = {
     data: CreateCommentRequest
   ): Promise<Comment> => {
     try {
+      // 토큰 상태 확인
+      const token =
+        localStorage.getItem("authToken") ||
+        sessionStorage.getItem("authToken");
+      console.log("댓글 작성 시 토큰:", token ? "존재함" : "없음");
+
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          console.log("토큰 만료 시간:", new Date(payload.exp * 1000));
+          console.log("현재 시간:", new Date());
+          console.log("토큰 만료 여부:", payload.exp * 1000 < Date.now());
+          console.log("토큰 팀 ID:", payload.teamId);
+        } catch (e) {
+          console.log("토큰 파싱 실패:", e);
+        }
+      }
+
       // API 문서에 따른 올바른 엔드포인트
       const url = `/${TEAM_ID}/comments`;
       const requestData = {

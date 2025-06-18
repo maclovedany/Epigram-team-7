@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import CommentSection from "@/components/epigram/CommentSection";
 import {
@@ -11,6 +12,7 @@ import {
 import { useEpigramDetail } from "./hooks";
 
 export default function EpigramDetailPage() {
+  const router = useRouter();
   const {
     epigram,
     isLoading,
@@ -44,8 +46,7 @@ export default function EpigramDetailPage() {
           isLiking={isLiking}
           onLike={handleLike}
           onEdit={() => {
-            // TODO: 수정 페이지로 이동
-            window.location.href = `/epigramlist/${epigram.id}/edit`;
+            router.push(`/epigramlist/${epigram.id}/edit`);
           }}
           onDelete={handleDelete}
         />

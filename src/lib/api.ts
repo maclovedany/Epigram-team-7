@@ -52,9 +52,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // 좋아요 요청이 아닌 경우에만 자동 리다이렉트
+      // 좋아요 요청이나 댓글 요청이 아닌 경우에만 자동 리다이렉트
       const isLikeRequest = error.config?.url?.includes("/like");
-      if (!isLikeRequest) {
+      const isCommentRequest = error.config?.url?.includes("/comments");
+      if (!isLikeRequest && !isCommentRequest) {
         localStorage.removeItem("authToken");
         window.location.href = "/login";
       }
@@ -149,11 +150,14 @@ export const epigramService = {
   // 에피그램 상세 조회
   getEpigramById: async (id: string): Promise<Epigram> => {
     try {
-      const response = await api.get<ApiResponse<Epigram>>(
-        endpoints.epigramById(id)
-      );
-      return response.data.data;
+      console.log("에피그램 상세 조회 API 호출:", id);
+      const response = await api.get<Epigram>(endpoints.epigramById(id));
+      console.log("에피그램 상세 응답:", response.data);
+      const epigram = response.data;
+      console.log("에피그램 작성자 ID:", epigram.writerId);
+      return epigram;
     } catch (error) {
+      console.error("에피그램 상세 조회 실패:", error);
       const message =
         error instanceof Error
           ? error.message
@@ -185,12 +189,15 @@ export const epigramService = {
     data: CreateEpigramRequest
   ): Promise<Epigram> => {
     try {
-      const response = await api.put<ApiResponse<Epigram>>(
+      console.log("에피그램 수정 API 호출:", id, data);
+      const response = await api.patch<Epigram>(
         endpoints.epigramById(id),
         data
       );
-      return response.data.data;
+      console.log("에피그램 수정 응답:", response.data);
+      return response.data;
     } catch (error) {
+      console.error("에피그램 수정 실패:", error);
       const message =
         error instanceof Error
           ? error.message
