@@ -156,6 +156,7 @@ export const useEpigrams = () => {
   useEffect(() => {
     console.log("useEffect 실행 - 초기 로드");
     loadEpigrams(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // loadEpigrams 의존성 제거
 
   return {

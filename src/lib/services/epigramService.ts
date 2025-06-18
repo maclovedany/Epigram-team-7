@@ -56,15 +56,14 @@ export const epigramService = {
 
       console.log("처리된 결과:", result);
       return result;
-    } catch (error) {
-      console.error("API 호출 실패:", error);
+    } catch (error: unknown) {
+      console.error("에피그램 조회 실패:", error);
 
-      // axios 에러 처리
       if (error instanceof Error) {
         throw error;
       }
 
-      const axiosError = error as unknown as {
+      const axiosError = error as {
         response?: {
           data?: { message?: string };
           status?: number;
@@ -72,17 +71,20 @@ export const epigramService = {
         };
         message?: string;
       };
-      let message = "에피그램을 불러오는데 실패했습니다.";
 
       if (axiosError.response?.data?.message) {
-        message = axiosError.response.data.message;
+        throw new Error(axiosError.response.data.message);
       } else if (axiosError.response?.status) {
-        message = `서버 오류 (${axiosError.response.status})`;
+        throw new Error(
+          `서버 오류 (${axiosError.response.status}): ${
+            axiosError.response.statusText || "알 수 없는 오류"
+          }`
+        );
       } else if (axiosError.message) {
-        message = axiosError.message;
+        throw new Error(axiosError.message);
       }
 
-      throw new Error(message);
+      throw new Error("에피그램을 불러오는데 실패했습니다.");
     }
   },
 

@@ -10,7 +10,6 @@ export default function EditForm() {
     setAuthor,
     setReferenceTitle,
     setReferenceUrl,
-    setTagInput,
     validation,
     isSubmitting,
     error,
@@ -83,7 +82,6 @@ export default function EditForm() {
       {/* 태그 */}
       <EpigramTagInput
         tags={formData.tags}
-        onTagsChange={() => {}} // 미사용이지만 필수 prop
         tagInput={formData.tagInput}
         onTagInputChange={handleTagInputChange}
         onTagKeyDown={handleTagKeyDown}

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import CommentSection from "@/components/epigram/CommentSection";
 import {
-  EpigramDetailHeader,
   EpigramDetailContent,
   LoadingSkeleton,
   ErrorState,
@@ -22,7 +21,6 @@ export default function EpigramDetailPage() {
     isAuthor,
     handleLike,
     handleDelete,
-    handleShare,
   } = useEpigramDetail();
 
   if (isLoading) {

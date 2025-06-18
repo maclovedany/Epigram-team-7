@@ -34,8 +34,8 @@ export default function EpigramDetailPage() {
         setIsLiked(data.isLiked || false);
 
         // 댓글 로드
-        const commentsData = await commentService.getComments(id, 3);
-        setComments(commentsData.list);
+        const commentsData = await commentService.getComments(id);
+        setComments(commentsData);
       } catch (err) {
         setError(
           err instanceof Error
@@ -56,16 +56,12 @@ export default function EpigramDetailPage() {
     if (!epigram) return;
 
     try {
-      const nextComments = await commentService.getComments(
-        String(epigram.id),
-        3,
-        comments[comments.length - 1]?.id
-      );
-      setComments((prev) => [...prev, ...nextComments.list]);
+      const nextComments = await commentService.getComments(String(epigram.id));
+      setComments(nextComments);
     } catch (err) {
       console.error("댓글 로드 실패:", err);
     }
-  }, [epigram, comments]);
+  }, [epigram]);
 
   // 무한스크롤
   useEffect(() => {
@@ -91,6 +87,7 @@ export default function EpigramDetailPage() {
         String(epigram.id),
         {
           content: comment.trim(),
+          isPrivate: false,
         }
       );
       setComments((prev) => [newComment, ...prev]);
@@ -105,7 +102,7 @@ export default function EpigramDetailPage() {
     if (!epigram) return;
 
     try {
-      await commentService.deleteComment(String(epigram.id), String(commentId));
+      await commentService.deleteComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } catch (err) {
       console.error("댓글 삭제 실패:", err);
@@ -170,9 +167,9 @@ export default function EpigramDetailPage() {
       <main className="max-w-3xl mx-auto py-10 px-4">
         {/* 태그 */}
         <div className="flex gap-2 mb-2">
-          {epigram.tags?.map((tag) => (
-            <span key={tag} className="text-[#ABB8CE] text-sm">
-              #{tag}
+          {epigram.tags?.map((tag, index) => (
+            <span key={index} className="text-[#ABB8CE] text-sm">
+              #{typeof tag === "string" ? tag : tag.name}
             </span>
           ))}
         </div>

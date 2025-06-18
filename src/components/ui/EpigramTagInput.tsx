@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 
 interface EpigramTagInputProps {
   tags: string[];
-  onTagsChange: (tags: string[]) => void;
   tagInput: string;
   onTagInputChange: (value: string) => void;
   onTagKeyDown: (
@@ -21,7 +20,6 @@ interface EpigramTagInputProps {
 
 export default function EpigramTagInput({
   tags,
-  onTagsChange,
   tagInput,
   onTagInputChange,
   onTagKeyDown,

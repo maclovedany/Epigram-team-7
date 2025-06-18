@@ -42,7 +42,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
       setIsLoading(true);
       setError("");
       const response = await commentService.getComments(epigramId);
-      setComments(response.list);
+      setComments(response);
     } catch (error) {
       const message =
         error instanceof Error
@@ -56,24 +56,17 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
   // 댓글 작성
   const onSubmitComment = async (data: CommentFormData) => {
-    try {
-      // 인증 상태 확인
-      console.log("댓글 작성 시 user:", user);
-      console.log("댓글 작성 시 isAuthenticated:", isAuthenticated);
-      console.log(
-        "댓글 작성 시 localStorage 토큰:",
-        localStorage.getItem("authToken")
-      );
-      console.log(
-        "댓글 작성 시 sessionStorage 토큰:",
-        sessionStorage.getItem("authToken")
-      );
+    if (!isAuthenticated) return;
 
-      const newComment = await commentService.createComment(epigramId, {
-        content: data.content,
-      });
-      setComments((prev) => [newComment, ...prev]);
+    try {
+      const commentData = {
+        ...data,
+        epigramId: parseInt(epigramId),
+        isPrivate: false,
+      };
+      await commentService.createComment(epigramId, commentData);
       reset();
+      loadComments();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "댓글 작성에 실패했습니다.";
@@ -84,8 +77,9 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   // 댓글 수정
   const handleEdit = async (commentId: number) => {
     try {
-      await commentService.updateComment(epigramId, commentId.toString(), {
+      await commentService.updateComment(commentId, {
         content: editContent,
+        isPrivate: false,
       });
       setComments((prev) =>
         prev.map((comment) =>
@@ -104,9 +98,11 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   };
 
   // 댓글 삭제
-  const handleDelete = async (commentId: number) => {
+  const deleteComment = async (commentId: number) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
     try {
-      await commentService.deleteComment(epigramId, commentId.toString());
+      await commentService.deleteComment(commentId);
       setComments((prev) => prev.filter((comment) => comment.id !== commentId));
     } catch (error) {
       const message =
@@ -245,7 +241,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(comment.id)}
+                            onClick={() => deleteComment(comment.id)}
                             className="flex items-center gap-1 text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />

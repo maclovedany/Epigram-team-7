@@ -11,8 +11,6 @@ export default function AddEpigramForm() {
     setAuthor,
     setReferenceTitle,
     setReferenceUrl,
-    setTags,
-    setTagInput,
     validation,
     isSubmitting,
     error,
@@ -101,7 +99,6 @@ export default function AddEpigramForm() {
       {/* 태그 */}
       <EpigramTagInput
         tags={formData.tags}
-        onTagsChange={setTags}
         tagInput={formData.tagInput}
         onTagInputChange={handleTagInputChange}
         onTagKeyDown={handleTagKeyDown}

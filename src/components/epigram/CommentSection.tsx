@@ -1,16 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MessageCircle, Send, User, Edit3, Trash2 } from "lucide-react";
-import {
-  Button,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui";
+import { User } from "lucide-react";
+import { Button } from "@/components/ui";
 import Textarea from "@/components/ui/Textarea";
 import {
   createCommentSchema,
@@ -27,9 +21,9 @@ interface CommentSectionProps {
 export default function CommentSection({ epigramId }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
 
   const { isAuthenticated, user } = useAuthStore();
 
@@ -37,28 +31,18 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm<CreateCommentFormData>({
-    resolver: zodResolver(createCommentSchema),
-  });
-
-  const {
-    register: editRegister,
-    handleSubmit: handleEditSubmit,
-    setValue: setEditValue,
-    reset: resetEdit,
-    formState: { errors: editErrors },
+    formState: { errors, isSubmitting },
   } = useForm<CreateCommentFormData>({
     resolver: zodResolver(createCommentSchema),
   });
 
   // 댓글 목록 로드
-  const loadComments = useCallback(async () => {
+  const loadComments = async () => {
     try {
       setIsLoading(true);
       setError("");
       const response = await commentService.getComments(epigramId);
-      setComments(response.list);
+      setComments(response);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "댓글을 불러오는데 실패했습니다.";
@@ -66,22 +50,22 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [epigramId]);
+  };
 
   useEffect(() => {
     loadComments();
-  }, [loadComments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 댓글 작성
   const onSubmitComment = async (data: CreateCommentFormData) => {
     if (!isAuthenticated) return;
 
     try {
-      setIsSubmitting(true);
-      // isPrivate 기본값 설정
       const commentData = {
         ...data,
-        isPrivate: data.isPrivate ?? false,
+        epigramId: parseInt(epigramId),
+        isPrivate: false,
       };
       await commentService.createComment(epigramId, commentData);
       reset();
@@ -89,33 +73,6 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "댓글 작성에 실패했습니다.";
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // 댓글 수정
-  const onEditComment = async (data: CreateCommentFormData) => {
-    if (!editingId) return;
-
-    try {
-      // isPrivate 기본값 설정
-      const commentData = {
-        ...data,
-        isPrivate: data.isPrivate ?? false,
-      };
-      await commentService.updateComment(
-        epigramId,
-        editingId.toString(),
-        commentData
-      );
-      setEditingId(null);
-      resetEdit();
-      loadComments();
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "댓글 수정에 실패했습니다.";
       setError(errorMessage);
     }
   };
@@ -125,8 +82,8 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 
     try {
-      await commentService.deleteComment(epigramId, commentId.toString());
-      loadComments();
+      await commentService.deleteComment(commentId);
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "댓글 삭제에 실패했습니다.";
@@ -137,13 +94,13 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   // 수정 시작
   const startEdit = (comment: Comment) => {
     setEditingId(comment.id);
-    setEditValue("content", comment.content);
+    setEditContent(comment.content);
   };
 
   // 수정 취소
   const cancelEdit = () => {
     setEditingId(null);
-    resetEdit();
+    setEditContent("");
   };
 
   const formatDate = (dateString: string) => {
@@ -171,6 +128,22 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     } else {
       const years = Math.floor(diffInSeconds / 31536000);
       return `${years}년 전`;
+    }
+  };
+
+  const handleEdit = async (commentId: number) => {
+    try {
+      await commentService.updateComment(commentId, {
+        content: editContent,
+        isPrivate: false,
+      });
+      setEditingId(null);
+      setEditContent("");
+      loadComments();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "댓글 수정에 실패했습니다.";
+      setError(errorMessage);
     }
   };
 
@@ -290,21 +263,19 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
                       {/* 댓글 텍스트 */}
                       {editingId === comment.id ? (
                         // 수정 모드
-                        <form
-                          onSubmit={handleEditSubmit(onEditComment)}
-                          className="space-y-2"
-                        >
+                        <div className="space-y-2">
                           <Textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
                             rows={2}
                             className="text-sm"
-                            error={editErrors.content?.message}
-                            {...editRegister("content")}
                           />
                           <div className="flex gap-2">
                             <Button
-                              type="submit"
+                              type="button"
                               size="sm"
                               className="text-xs px-3 py-1"
+                              onClick={() => handleEdit(comment.id)}
                             >
                               저장
                             </Button>
@@ -318,7 +289,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
                               취소
                             </Button>
                           </div>
-                        </form>
+                        </div>
                       ) : (
                         // 일반 표시 모드
                         <p className="text-sm text-gray-700 leading-relaxed">
