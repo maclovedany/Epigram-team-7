@@ -106,12 +106,52 @@ export const epigramService = {
     tags: string[];
   }) => {
     try {
+      console.log("에피그램 생성 요청:", data);
+      const token = localStorage.getItem("authToken");
+      console.log("인증 토큰:", token);
+
+      // JWT 토큰 만료 시간 확인
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          console.log("토큰 만료 시간:", new Date(payload.exp * 1000));
+          console.log("현재 시간:", new Date());
+          console.log("토큰 만료 여부:", currentTime > payload.exp);
+          console.log("토큰의 teamId:", payload.teamId);
+        } catch (e) {
+          console.log("토큰 파싱 실패:", e);
+        }
+      }
+
+      console.log("요청 URL:", `/${TEAM_ID}/epigrams`);
+      console.log("실제 TEAM_ID:", TEAM_ID);
+
       const response = await api.post<ApiResponse<Epigram>>(
         `/${TEAM_ID}/epigrams`,
         data
       );
       return response.data.data;
     } catch (error) {
+      console.error("에피그램 생성 실패:", error);
+
+      // axios 에러 처리
+      const axiosError = error as any;
+      if (axiosError.response) {
+        console.error("응답 데이터:", axiosError.response.data);
+        console.error("응답 상태:", axiosError.response.status);
+        console.error("응답 헤더:", axiosError.response.headers);
+
+        if (axiosError.response.status === 403) {
+          throw new Error("권한이 없습니다. 다시 로그인해주세요.");
+        }
+
+        const message =
+          axiosError.response.data?.message ||
+          `서버 오류 (${axiosError.response.status})`;
+        throw new Error(message);
+      }
+
       const message =
         error instanceof Error
           ? error.message

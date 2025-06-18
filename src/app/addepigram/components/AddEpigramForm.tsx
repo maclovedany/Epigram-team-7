@@ -10,11 +10,13 @@ export default function AddEpigramForm() {
     setAuthor,
     setReferenceTitle,
     setReferenceUrl,
+    setTags,
     setTagInput,
     validation,
     isSubmitting,
     error,
     handleTagKeyDown,
+    handleTagInputChange,
     handleTagRemove,
     handleSubmit,
   } = useAddEpigram();
@@ -118,13 +120,15 @@ export default function AddEpigramForm() {
         <input
           className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
           value={formData.tagInput}
-          onChange={(e) =>
-            setTagInput(e.target.value.replace(/[^\w가-힣]/g, "").slice(0, 10))
-          }
+          onChange={(e) => handleTagInputChange(e.target.value)}
           onKeyDown={handleTagKeyDown}
-          placeholder="입력하여 태그 작성 (최대 10자, 최대 3개)"
+          placeholder="입력하여 태그 작성 (Enter 또는 쉼표로 추가, 최대 10자, 최대 3개)"
           disabled={formData.tags.length >= 3}
         />
+        <div className="text-xs text-gray-500 mt-1">
+          Enter 키 또는 쉼표(,)를 눌러 태그를 추가하세요. (
+          {formData.tags.length}/3개)
+        </div>
         {validation.tagError && (
           <div className="text-red-500 text-xs mt-1">{validation.tagError}</div>
         )}
