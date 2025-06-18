@@ -36,7 +36,7 @@ export default function EpigramDetailContent({
       }}
     >
       {/* 메인 에피그램 카드 */}
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-[640px] mx-auto px-4">
         <div className="bg-transparent p-8">
           {/* 상단 헤더 - 태그와 드롭다운 */}
           <div className="flex justify-between items-start mb-6">
@@ -94,7 +94,7 @@ export default function EpigramDetailContent({
               {epigram.content}
             </p>
             {/* 저자 - 우측 정렬 */}
-            <p className="text-lg text-gray-600 text-right">
+            <p className="text-lg text-gray-500 text-right">
               - {epigram.author} -
             </p>
           </div>
@@ -106,13 +106,13 @@ export default function EpigramDetailContent({
               <button
                 onClick={onLike}
                 disabled={isLiking}
-                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full transition-colors hover:bg-gray-800"
+                className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full transition-colors hover:bg-gray-800"
               >
                 <img src="/like.png" alt="좋아요" className="w-5 h-5" />
                 <span>{epigram.likeCount || 0}</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full">
+              <div className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full">
                 <img src="/like.png" alt="좋아요" className="w-5 h-5" />
                 <span>{epigram.likeCount || 0}</span>
               </div>
@@ -120,11 +120,11 @@ export default function EpigramDetailContent({
 
             {/* 출처 버튼 */}
             {(epigram.referenceTitle || epigram.referenceUrl) && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-full">
+              <div className="flex items-center gap-2 px-4 py-2 h-10 bg-gray-100 text-gray-700 rounded-full">
                 <span className="text-sm">
                   {epigram.referenceTitle || "출처"}
                 </span>
-                <img src="/md.png" alt="출처" className="w-4 h-4" />
+                <img src="/md.png" alt="출처" className="w-4 h-4 filter-none" />
               </div>
             )}
           </div>

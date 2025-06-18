@@ -289,12 +289,37 @@ export const epigramService = {
 
   // 좋아요 토글
   toggleLike: async (id: number, isLiked: boolean) => {
-    const url = `https://fe-project-epigram-api.vercel.app/14-7/epigrams/${id}/like`;
-    const response = await fetch(url, {
-      method: isLiked ? "DELETE" : "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!response.ok) throw new Error("좋아요 처리에 실패했습니다.");
-    return response.json(); // { likeCount, isLiked, ... }
+    try {
+      const response = await api.request({
+        method: isLiked ? "DELETE" : "POST",
+        url: `/${TEAM_ID}/epigrams/${id}/like`,
+      });
+
+      if (response.data && response.data.data) {
+        return response.data.data;
+      } else if (response.data && typeof response.data === "object") {
+        return response.data;
+      } else {
+        throw new Error("서버 응답 구조가 올바르지 않습니다.");
+      }
+    } catch (error) {
+      console.error("좋아요 처리 실패:", error);
+      const axiosError = error as any;
+      if (axiosError.response) {
+        console.error("응답 데이터:", axiosError.response.data);
+        console.error("응답 상태:", axiosError.response.status);
+
+        if (axiosError.response.status === 401) {
+          throw new Error("로그인이 필요합니다.");
+        }
+        if (axiosError.response.status === 403) {
+          throw new Error("권한이 없습니다.");
+        }
+      }
+
+      const message =
+        error instanceof Error ? error.message : "좋아요 처리에 실패했습니다.";
+      throw new Error(message);
+    }
   },
 };

@@ -144,7 +144,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
   return (
     <div className="w-full bg-gray-100 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-[640px] mx-auto px-4">
         <div className="bg-transparent p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-6">
             댓글 ({comments.length})
@@ -153,7 +153,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
           {isAuthenticated ? (
             <form
               onSubmit={handleSubmit(onSubmitComment)}
-              className="mb-6 bg-gray-50 p-4 rounded-lg"
+              className="mb-6 bg-gray-100 p-4 rounded-lg"
             >
               <div className="flex gap-3">
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
@@ -163,7 +163,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
                   <Textarea
                     placeholder="100자 이내로 입력해주세요."
                     rows={2}
-                    className="resize-none bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="resize-none bg-gray-100 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     error={errors.content?.message}
                     {...register("content")}
                   />
@@ -173,7 +173,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
                       size="sm"
                       isLoading={isSubmitting}
                       disabled={isSubmitting}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
+                      className="bg-[#BFC6D1] hover:bg-[#A7B2C5] disabled:bg-[#E9EBF0] text-white px-4 py-2 rounded-md text-sm"
                     >
                       등록
                     </Button>
@@ -217,7 +217,7 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
               comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:mb-0"
+                  className="bg-gray-100 p-4 rounded-lg mb-4 last:mb-0"
                 >
                   <div className="flex gap-3">
                     {/* 프로필 이미지 */}
