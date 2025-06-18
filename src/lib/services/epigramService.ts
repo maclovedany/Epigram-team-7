@@ -290,14 +290,66 @@ export const epigramService = {
   // 좋아요 토글
   toggleLike: async (id: number, isLiked: boolean) => {
     try {
+      // 토큰 확인
+      const token = localStorage.getItem("authToken");
+      console.log("현재 토큰:", token ? "존재함" : "없음");
+
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          console.log("토큰 만료 시간:", new Date(payload.exp * 1000));
+          console.log("현재 시간:", new Date());
+          console.log("토큰 만료 여부:", currentTime > payload.exp);
+          console.log("토큰의 팀 ID:", payload.teamId);
+          console.log("현재 TEAM_ID:", TEAM_ID);
+
+          // 토큰이 만료된 경우 제거
+          if (currentTime > payload.exp) {
+            console.log("토큰이 만료되어 제거합니다.");
+            localStorage.removeItem("authToken");
+            throw new Error("토큰이 만료되었습니다. 다시 로그인해주세요.");
+          }
+
+          // 팀 ID가 일치하지 않는 경우
+          if (payload.teamId !== TEAM_ID) {
+            console.log("팀 ID가 일치하지 않아 토큰을 제거합니다.");
+            localStorage.removeItem("authToken");
+            throw new Error(
+              "인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
+            );
+          }
+        } catch (e) {
+          console.error("토큰 파싱 실패:", e);
+          if (
+            e instanceof Error &&
+            (e.message.includes("만료") || e.message.includes("일치하지"))
+          ) {
+            throw e;
+          }
+        }
+      } else {
+        throw new Error("로그인이 필요합니다.");
+      }
+
+      console.log(
+        `좋아요 ${isLiked ? "취소" : "추가"} 요청:`,
+        `/${TEAM_ID}/epigrams/${id}/like`
+      );
+
       const response = await api.request({
         method: isLiked ? "DELETE" : "POST",
         url: `/${TEAM_ID}/epigrams/${id}/like`,
       });
 
-      if (response.data && response.data.data) {
-        return response.data.data;
-      } else if (response.data && typeof response.data === "object") {
+      console.log("좋아요 응답:", response.data);
+
+      // API 문서에 따르면 직접 에피그램 객체를 반환
+      if (
+        response.data &&
+        typeof response.data === "object" &&
+        "id" in response.data
+      ) {
         return response.data;
       } else {
         throw new Error("서버 응답 구조가 올바르지 않습니다.");
@@ -314,6 +366,9 @@ export const epigramService = {
         }
         if (axiosError.response.status === 403) {
           throw new Error("권한이 없습니다.");
+        }
+        if (axiosError.response.status === 404) {
+          throw new Error("에피그램을 찾을 수 없습니다.");
         }
       }
 

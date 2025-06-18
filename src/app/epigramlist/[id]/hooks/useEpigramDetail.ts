@@ -57,6 +57,13 @@ export function useEpigramDetail() {
       });
     } catch (err) {
       console.error("좋아요 처리 실패:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "좋아요 처리에 실패했습니다.";
+
+      // 401 에러가 아닌 경우에만 에러 메시지 표시
+      if (!errorMessage.includes("로그인")) {
+        alert(errorMessage);
+      }
     } finally {
       setIsLiking(false);
     }

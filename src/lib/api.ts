@@ -24,10 +24,22 @@ const api = axios.create({
 // Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("authToken");
+    // localStorage와 sessionStorage 모두 확인
+    let token = localStorage.getItem("authToken");
+    if (!token) {
+      token = sessionStorage.getItem("authToken");
+    }
+
+    console.log("API 요청 - 토큰:", token ? "존재함" : "없음");
+    console.log("API 요청 - URL:", config.url);
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("API 요청 - Authorization 헤더 설정됨");
+    } else {
+      console.log("API 요청 - 토큰 없음, Authorization 헤더 없음");
     }
+
     return config;
   },
   (error) => {
@@ -40,8 +52,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("authToken");
-      window.location.href = "/login";
+      // 좋아요 요청이 아닌 경우에만 자동 리다이렉트
+      const isLikeRequest = error.config?.url?.includes("/like");
+      if (!isLikeRequest) {
+        localStorage.removeItem("authToken");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

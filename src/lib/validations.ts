@@ -69,6 +69,7 @@ export const createCommentSchema = z.object({
     .min(1, "댓글 내용을 입력해주세요")
     .min(2, "댓글은 최소 2자 이상이어야 합니다")
     .max(300, "댓글은 최대 300자까지 가능합니다"),
+  isPrivate: z.boolean().optional(),
 });
 
 // 타입 추출

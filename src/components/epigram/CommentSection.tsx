@@ -16,7 +16,7 @@ import {
   createCommentSchema,
   type CreateCommentFormData,
 } from "@/lib/validations";
-import { commentService } from "@/lib/api";
+import { commentService } from "@/lib/services/commentService";
 import { useAuthStore } from "@/store/authStore";
 import { Comment } from "@/types";
 
@@ -78,7 +78,12 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
     try {
       setIsSubmitting(true);
-      await commentService.createComment(epigramId, data);
+      // isPrivate 기본값 설정
+      const commentData = {
+        ...data,
+        isPrivate: data.isPrivate ?? false,
+      };
+      await commentService.createComment(epigramId, commentData);
       reset();
       loadComments(); // 댓글 목록 새로고침
     } catch (err) {
@@ -95,7 +100,16 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
     if (!editingId) return;
 
     try {
-      await commentService.updateComment(epigramId, editingId.toString(), data);
+      // isPrivate 기본값 설정
+      const commentData = {
+        ...data,
+        isPrivate: data.isPrivate ?? false,
+      };
+      await commentService.updateComment(
+        epigramId,
+        editingId.toString(),
+        commentData
+      );
       setEditingId(null);
       resetEdit();
       loadComments();
@@ -133,13 +147,31 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return "방금 전";
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes}분 전`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours}시간 전`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days}일 전`;
+    } else if (diffInSeconds < 2592000) {
+      const weeks = Math.floor(diffInSeconds / 604800);
+      return `${weeks}주 전`;
+    } else if (diffInSeconds < 31536000) {
+      const months = Math.floor(diffInSeconds / 2592000);
+      return `${months}개월 전`;
+    } else {
+      const years = Math.floor(diffInSeconds / 31536000);
+      return `${years}년 전`;
+    }
   };
 
   return (
