@@ -7,8 +7,7 @@ export type { InputProps } from "./Input";
 export { default as Textarea } from "./Textarea";
 export type { TextareaProps } from "./Textarea";
 
-export { default as TagInput } from "./TagInput";
-export type { TagInputProps } from "./TagInput";
+export { default as EpigramTagInput } from "./EpigramTagInput";
 
 export {
   Card,

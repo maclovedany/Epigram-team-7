@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditEpigram } from "../hooks/useEditEpigram";
+import { EpigramTagInput } from "@/components/ui";
 
 export default function EditForm() {
   const {
@@ -80,41 +81,16 @@ export default function EditForm() {
       </div>
 
       {/* 태그 */}
-      <div>
-        <label className="block font-semibold mb-2">태그</label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {formData.tags.map((tag) => (
-            <span
-              key={tag}
-              className="bg-[#edf0f4] px-3 py-1 rounded-full text-sm flex items-center"
-            >
-              #{tag}
-              <button
-                type="button"
-                className="ml-1 text-gray-400 hover:text-red-500"
-                onClick={() => handleTagRemove(tag)}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        <input
-          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
-          value={formData.tagInput}
-          onChange={(e) => handleTagInputChange(e.target.value)}
-          onKeyDown={handleTagKeyDown}
-          placeholder="입력하여 태그 작성 (Enter 또는 쉼표로 추가, 최대 10자, 최대 3개)"
-          disabled={formData.tags.length >= 3}
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          Enter 키 또는 쉼표(,)를 눌러 태그를 추가하세요. (
-          {formData.tags.length}/3개)
-        </div>
-        {validation.tagError && (
-          <div className="text-red-500 text-xs mt-1">{validation.tagError}</div>
-        )}
-      </div>
+      <EpigramTagInput
+        tags={formData.tags}
+        onTagsChange={() => {}} // 미사용이지만 필수 prop
+        tagInput={formData.tagInput}
+        onTagInputChange={handleTagInputChange}
+        onTagKeyDown={handleTagKeyDown}
+        onTagRemove={handleTagRemove}
+        maxTags={3}
+        error={validation.tagError}
+      />
 
       {/* 에러 메시지 */}
       {error && (

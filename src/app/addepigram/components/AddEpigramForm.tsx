@@ -1,7 +1,7 @@
 "use client";
 
 import { useAddEpigram } from "../hooks/useAddEpigram";
-import { useState, useRef } from "react";
+import { EpigramTagInput } from "@/components/ui";
 
 export default function AddEpigramForm() {
   const {
@@ -21,24 +21,6 @@ export default function AddEpigramForm() {
     handleTagRemove,
     handleSubmit,
   } = useAddEpigram();
-
-  const [isComposing, setIsComposing] = useState(false); // 한글 입력 조합 상태
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // 조합 이벤트 처리
-  const handleCompositionStart = () => {
-    setIsComposing(true);
-    console.log("handleCompositionStart");
-  };
-
-  const handleCompositionEnd = (
-    e: React.CompositionEvent<HTMLInputElement>
-  ) => {
-    setIsComposing(false);
-    const finalValue = (e.target as HTMLInputElement).value; // input 요소의 최종 값
-    console.log("handleCompositionEnd:", { data: finalValue });
-    handleTagInputChange(finalValue); // 조합 완료된 값으로 입력 업데이트
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -117,44 +99,16 @@ export default function AddEpigramForm() {
       </div>
 
       {/* 태그 */}
-      <div>
-        <label className="block font-semibold mb-2">태그</label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {formData.tags.map((tag) => (
-            <span
-              key={tag}
-              className="bg-[#edf0f4] px-3 py-1 rounded-full text-sm flex items-center"
-            >
-              #{tag}
-              <button
-                type="button"
-                className="ml-1 text-gray-400 hover:text-red-500"
-                onClick={() => handleTagRemove(tag)}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        <input
-          ref={inputRef}
-          className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
-          value={formData.tagInput}
-          onChange={(e) => handleTagInputChange(e.target.value)}
-          onKeyDown={(e) => handleTagKeyDown(e, isComposing)}
-          onCompositionStart={handleCompositionStart}
-          onCompositionEnd={handleCompositionEnd}
-          placeholder="입력하여 태그 작성 (Enter 또는 쉼표로 추가, 최대 10자, 최대 3개)"
-          disabled={formData.tags.length >= 3}
-        />
-        <div className="text-xs text-gray-400 mt-1">
-          Enter 키 또는 쉼표(,)를 눌러 태그를 추가하세요. (
-          {formData.tags.length}/3개)
-        </div>
-        {validation.tagError && (
-          <div className="text-red-500 text-xs mt-1">{validation.tagError}</div>
-        )}
-      </div>
+      <EpigramTagInput
+        tags={formData.tags}
+        onTagsChange={setTags}
+        tagInput={formData.tagInput}
+        onTagInputChange={handleTagInputChange}
+        onTagKeyDown={handleTagKeyDown}
+        onTagRemove={handleTagRemove}
+        maxTags={3}
+        error={validation.tagError}
+      />
 
       {/* 에러 메시지 */}
       {error && (
