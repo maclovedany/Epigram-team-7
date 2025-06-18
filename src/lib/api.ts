@@ -12,7 +12,7 @@ import {
 } from "@/types";
 
 const API_BASE_URL = "https://fe-project-epigram-api.vercel.app";
-export const TEAM_ID = "14-7"; // 팀 ID
+export const TEAM_ID = "14-98"; // 팀 ID
 
 const api = axios.create({
   baseURL: API_BASE_URL,
