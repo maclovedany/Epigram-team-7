@@ -43,10 +43,31 @@ export function useAuthForm<T extends z.ZodSchema>({
         response = await authService.signup(data);
       }
 
-      // 로그인 성공 시 토큰 저장 및 리다이렉트
-      login(response.user, response.accessToken);
-      router.push("/epigramlist");
+      // 응답 데이터 검증
+      console.log("Auth response:", response);
+
+      if (!response) {
+        throw new Error("서버 응답이 없습니다.");
+      }
+
+      if (!response.user) {
+        throw new Error("사용자 정보를 받을 수 없습니다.");
+      }
+
+      if (!response.accessToken) {
+        throw new Error("인증 토큰을 받을 수 없습니다.");
+      }
+
+      if (mode === "login") {
+        // 로그인 성공 시 토큰 저장 및 리다이렉트
+        login(response.user, response.accessToken);
+        router.push("/epigramlist");
+      } else {
+        // 회원가입 성공 시 로그인 페이지로 이동
+        router.push("/login");
+      }
     } catch (error) {
+      console.error("Auth error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
