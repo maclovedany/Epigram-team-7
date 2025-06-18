@@ -11,6 +11,7 @@ export interface EpigramFormData {
   referenceTitle: string;
   referenceUrl: string;
   tags: string[];
+  tagInput: string;
 }
 
 export interface ValidationErrors {
@@ -62,56 +63,78 @@ export function useAddEpigram() {
     content.trim() === "" ||
     (authorType === "직접입력" && author.trim() === "");
 
-  // Tag management
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      // 쉼표 제거하고 트림
-      let cleanInput = tagInput.replace(/,/g, "").trim();
-      // 특수문자 제거 (한글, 영문, 숫자만 허용)
-      cleanInput = cleanInput.replace(/[^a-zA-Z0-9가-힣]/g, "");
+  // 디버깅: tags 상태 변화 추적
+  useEffect(() => {
+    console.log("tags updated:", tags);
+  }, [tags]);
 
-      if (
-        cleanInput &&
-        tags.length < 3 &&
-        cleanInput.length <= 10 &&
-        !tags.includes(cleanInput)
-      ) {
-        setTags([...tags, cleanInput]);
-        setTagInput("");
-      } else {
-        setTagInput("");
-      }
+  // Tag management
+  const addTag = (cleanInput: string) => {
+    // 쉼표 제거하고 트림
+    cleanInput = cleanInput.replace(/,/g, "").trim();
+    // 특수문자 제거 (한글, 영문, 숫자만 허용)
+    cleanInput = cleanInput.replace(/[^a-zA-Z0-9가-힣]/g, "");
+
+    if (
+      cleanInput &&
+      tags.length < 3 &&
+      cleanInput.length <= 10 &&
+      !tags.includes(cleanInput)
+    ) {
+      console.log("Adding tag:", cleanInput, { currentTags: tags, tagInput });
+      setTags((prevTags) => [...prevTags, cleanInput]); // 함수형 업데이트
+      setTagInput("");
+    } else {
+      console.log("Tag not added:", {
+        cleanInput,
+        currentTags: tags,
+        tagInput,
+      });
+      setTagInput("");
+    }
+  };
+
+  const handleTagKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    isComposing: boolean
+  ) => {
+    if (isComposing) {
+      console.log("Ignoring keydown due to composition:", {
+        key: e.key,
+        input: tagInput,
+      });
+      return; // 조합 중에는 모든 키 이벤트 무시
+    }
+
+    console.log("handleTagKeyDown:", { key: e.key, input: tagInput });
+    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
+      e.preventDefault();
+      handleTagRemove(tags[tags.length - 1]);
     }
   };
 
   const handleTagInputChange = (value: string) => {
-    // 쉼표가 입력되면 즉시 태그 추가
+    console.log("handleTagInputChange:", { value, currentTagInput: tagInput });
+    // 쉼표가 포함된 경우, 쉼표 이전 값으로 태그 추가 시도
     if (value.includes(",")) {
-      // 쉼표 제거하고 트림
-      let newTag = value.replace(/,/g, "").trim();
-      // 특수문자 제거 (한글, 영문, 숫자만 허용)
-      newTag = newTag.replace(/[^a-zA-Z0-9가-힣]/g, "");
-
-      if (
-        newTag &&
-        tags.length < 3 &&
-        newTag.length <= 10 &&
-        !tags.includes(newTag)
-      ) {
-        setTags([...tags, newTag]);
-        setTagInput("");
+      const cleanValue = value.replace(/,/g, "").trim();
+      if (cleanValue) {
+        addTag(cleanValue);
       } else {
         setTagInput("");
       }
     } else {
-      // 10자로 제한만 하고 다른 필터링은 하지 않음 (한글 입력 허용)
-      setTagInput(value.slice(0, 10));
+      setTagInput(value.slice(0, 10)); // 10자 제한
     }
   };
 
-  const handleTagRemove = (tag: string) =>
-    setTags(tags.filter((t) => t !== tag));
+  const handleTagRemove = (tag: string) => {
+    console.log("Removing tag:", tag, { currentTags: tags });
+    setTags((prevTags) => prevTags.filter((t) => t !== tag));
+  };
 
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useAddEpigram } from "../hooks/useAddEpigram";
+import { useState, useRef } from "react";
 
 export default function AddEpigramForm() {
   const {
@@ -20,6 +21,24 @@ export default function AddEpigramForm() {
     handleTagRemove,
     handleSubmit,
   } = useAddEpigram();
+
+  const [isComposing, setIsComposing] = useState(false); // 한글 입력 조합 상태
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // 조합 이벤트 처리
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+    console.log("handleCompositionStart");
+  };
+
+  const handleCompositionEnd = (
+    e: React.CompositionEvent<HTMLInputElement>
+  ) => {
+    setIsComposing(false);
+    const finalValue = (e.target as HTMLInputElement).value; // input 요소의 최종 값
+    console.log("handleCompositionEnd:", { data: finalValue });
+    handleTagInputChange(finalValue); // 조합 완료된 값으로 입력 업데이트
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -118,14 +137,17 @@ export default function AddEpigramForm() {
           ))}
         </div>
         <input
+          ref={inputRef}
           className="w-full border rounded-lg px-4 py-2 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
           value={formData.tagInput}
           onChange={(e) => handleTagInputChange(e.target.value)}
-          onKeyDown={handleTagKeyDown}
+          onKeyDown={(e) => handleTagKeyDown(e, isComposing)}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           placeholder="입력하여 태그 작성 (Enter 또는 쉼표로 추가, 최대 10자, 최대 3개)"
           disabled={formData.tags.length >= 3}
         />
-        <div className="text-xs text-gray-500 mt-1">
+        <div className="text-xs text-gray-400 mt-1">
           Enter 키 또는 쉼표(,)를 눌러 태그를 추가하세요. (
           {formData.tags.length}/3개)
         </div>

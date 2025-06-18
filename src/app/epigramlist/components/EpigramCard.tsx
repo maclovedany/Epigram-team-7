@@ -10,7 +10,7 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
     <div className="space-y-3 cursor-pointer" onClick={onClick}>
       {/* 에피그램 카드 */}
       <div
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col h-40"
         style={{
           backgroundImage: `url('/notebook-bg.png')`,
           backgroundSize: "cover",
@@ -19,10 +19,14 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
         }}
       >
         {/* 에피그램 내용 */}
-        <div className="mb-6">
-          <p className="text-lg text-gray-900 leading-relaxed mb-4">
+        <div className="flex-grow overflow-hidden">
+          <p className="text-lg text-gray-900 leading-relaxed">
             {epigram.content}
           </p>
+        </div>
+
+        {/* 저자 */}
+        <div>
           <p className="text-right text-sm" style={{ color: "#ABB8CE" }}>
             - {epigram.author} -
           </p>
