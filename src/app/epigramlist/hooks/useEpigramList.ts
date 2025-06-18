@@ -8,7 +8,7 @@ export const useEpigramList = () => {
   const { epigrams, isLoading, hasMore, error, loadMore, refresh } =
     useEpigrams();
   const { isAuthenticated } = useAuthStore();
-  const { epigrams: storeEpigrams, setEpigrams } = useEpigramStore();
+  const { setEpigrams } = useEpigramStore();
   const router = useRouter();
 
   // 에피그램 목록이 로드되면 스토어에도 저장
@@ -31,8 +31,8 @@ export const useEpigramList = () => {
   };
 
   return {
-    // Data - 스토어의 에피그램을 우선 사용, 없으면 훅의 에피그램 사용
-    epigrams: storeEpigrams.length > 0 ? storeEpigrams : epigrams,
+    // Data - 훅의 에피그램을 직접 사용 (스토어는 캐싱용으로만 사용)
+    epigrams,
     isLoading,
     hasMore,
     error,
