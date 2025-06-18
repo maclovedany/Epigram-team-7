@@ -28,13 +28,15 @@ export const EpigramListContent = () => {
 
       {/* 에피그램 목록 - 2열 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {epigrams.map((epigram) => (
-          <EpigramCard
-            key={epigram.id}
-            epigram={epigram}
-            onClick={() => handleEpigramClick(epigram.id)}
-          />
-        ))}
+        {epigrams
+          .filter((epigram) => epigram && epigram.id) // undefined 값과 id가 없는 항목 필터링
+          .map((epigram) => (
+            <EpigramCard
+              key={epigram.id}
+              epigram={epigram}
+              onClick={() => handleEpigramClick(epigram.id)}
+            />
+          ))}
       </div>
 
       {/* 로딩 중 메시지 */}

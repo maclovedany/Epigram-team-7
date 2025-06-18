@@ -43,9 +43,12 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           isLoading: false,
         });
-        // localStorage에도 저장
+        // localStorage에서 기존 토큰 제거 후 새 토큰 저장
         if (typeof window !== "undefined") {
+          localStorage.removeItem("authToken");
           localStorage.setItem("authToken", token);
+          console.log("새 토큰 저장됨:", token);
+          console.log("저장된 토큰 확인:", localStorage.getItem("authToken"));
         }
       },
 

@@ -1,12 +1,10 @@
-import api from "../api";
+import api, { TEAM_ID } from "../api";
 import {
   LoginRequest,
   SignupRequest,
   AuthResponse,
   ApiResponse,
 } from "@/types";
-
-const TEAM_ID = "14-차경훈";
 
 export const authService = {
   // 로그인

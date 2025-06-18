@@ -59,8 +59,19 @@ export function useAuthForm<T extends z.ZodSchema>({
       }
 
       if (mode === "login") {
-        // 로그인 성공 시 토큰 저장 및 리다이렉트
+        // 로그인 성공 시 기존 토큰 완전 제거 후 새 토큰 저장
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("authToken");
+          sessionStorage.removeItem("authToken");
+        }
         login(response.user, response.accessToken);
+
+        // 토큰 저장 확인
+        setTimeout(() => {
+          const savedToken = localStorage.getItem("authToken");
+          console.log("로그인 후 저장된 토큰:", savedToken);
+        }, 100);
+
         router.push("/epigramlist");
       } else {
         // 회원가입 성공 시 로그인 페이지로 이동

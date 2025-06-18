@@ -97,6 +97,11 @@ export const useEpigrams = () => {
     loadEpigrams(false);
   };
 
+  // 새 에피그램을 목록 맨 앞에 추가
+  const addEpigram = useCallback((newEpigram: Epigram) => {
+    setEpigrams((prev) => [newEpigram, ...prev]);
+  }, []);
+
   useEffect(() => {
     loadEpigrams(false);
   }, [loadEpigrams]);
@@ -108,5 +113,6 @@ export const useEpigrams = () => {
     error,
     loadMore: handleLoadMore,
     refresh,
+    addEpigram,
   };
 };

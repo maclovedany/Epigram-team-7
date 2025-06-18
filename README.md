@@ -90,7 +90,7 @@ src/
 
 ### 팀 정보
 
-- **팀 ID**: `14-차경훈`
+- **팀 ID**: `14-7`
 - **API Base URL**: `https://fe-project-epigram-api.vercel.app`
 
 ## 📦 배포

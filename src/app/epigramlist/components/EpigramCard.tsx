@@ -1,4 +1,4 @@
-import { Epigram } from "@/types";
+import { Epigram, Tag } from "@/types";
 
 interface EpigramCardProps {
   epigram: Epigram;
@@ -12,9 +12,10 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
       <div
         className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
         style={{
-          backgroundImage: `linear-gradient(to right, #f8f9fa 0%, #ffffff 100%)`,
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+          backgroundImage: `url('/notebook-bg.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
         {/* 에피그램 내용 */}
@@ -30,13 +31,13 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
 
       {/* 태그들 - 카드 다음줄 우측 하단 */}
       <div className="flex flex-wrap gap-2 justify-end">
-        {epigram.tags.map((tag, index) => (
+        {epigram.tags.map((tag: Tag) => (
           <span
-            key={index}
+            key={tag.id}
             className="inline-block px-3 py-1 text-sm"
             style={{ color: "#ABB8CE" }}
           >
-            #{tag}
+            #{tag.name}
           </span>
         ))}
       </div>

@@ -1,12 +1,10 @@
-import api from "./api";
+import api, { TEAM_ID } from "../api";
 import {
   Epigram,
   CreateEpigramRequest,
   ApiResponse,
   PaginatedResponse,
 } from "@/types";
-
-const TEAM_ID = "14-차경훈";
 
 export const epigramService = {
   // 에피그램 목록 조회
@@ -107,10 +105,19 @@ export const epigramService = {
   }) => {
     try {
       console.log("에피그램 생성 요청:", data);
-      const token = localStorage.getItem("authToken");
+      // localStorage와 sessionStorage 모두 확인
+      let token = localStorage.getItem("authToken");
+      if (!token) {
+        token = sessionStorage.getItem("authToken");
+      }
       console.log("인증 토큰:", token);
 
-      // JWT 토큰 만료 시간 확인
+      // 토큰이 없으면 즉시 에러
+      if (!token) {
+        throw new Error("로그인이 필요합니다.");
+      }
+
+      // JWT 토큰 검증
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
@@ -119,9 +126,33 @@ export const epigramService = {
           console.log("현재 시간:", new Date());
           console.log("토큰 만료 여부:", currentTime > payload.exp);
           console.log("토큰의 teamId:", payload.teamId);
+          console.log("현재 설정된 TEAM_ID:", TEAM_ID);
+
+          // 토큰 만료 확인
+          if (currentTime > payload.exp) {
+            console.log("토큰이 만료되었습니다.");
+            localStorage.removeItem("authToken");
+            throw new Error("토큰이 만료되었습니다. 다시 로그인해주세요.");
+          }
+
+          // 팀 ID 불일치 확인
+          if (payload.teamId !== TEAM_ID) {
+            console.log("토큰의 팀 ID와 현재 설정된 팀 ID가 다릅니다.");
+            localStorage.removeItem("authToken");
+            throw new Error(
+              "인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
+            );
+          }
         } catch (e) {
-          console.log("토큰 파싱 실패:", e);
+          console.log("토큰 검증 실패:", e);
+          if (e instanceof Error && e.message.includes("로그인")) {
+            throw e;
+          }
+          localStorage.removeItem("authToken");
+          throw new Error("유효하지 않은 토큰입니다. 다시 로그인해주세요.");
         }
+      } else {
+        throw new Error("로그인이 필요합니다.");
       }
 
       console.log("요청 URL:", `/${TEAM_ID}/epigrams`);
@@ -131,7 +162,27 @@ export const epigramService = {
         `/${TEAM_ID}/epigrams`,
         data
       );
-      return response.data.data;
+
+      console.log("에피그램 생성 응답:", response.data);
+      console.log("응답의 tags:", (response.data as any).tags);
+
+      // 응답 구조 확인 및 처리
+      if (response.data && response.data.data) {
+        console.log("응답 데이터:", response.data.data);
+        console.log("응답 데이터의 tags:", response.data.data.tags);
+        return response.data.data;
+      } else if (
+        response.data &&
+        typeof response.data === "object" &&
+        "id" in response.data
+      ) {
+        // 직접 에피그램 객체가 반환된 경우
+        console.log("직접 에피그램 데이터:", response.data);
+        return response.data as unknown as Epigram;
+      } else {
+        console.error("예상치 못한 응답 구조:", response.data);
+        throw new Error("서버 응답 구조가 올바르지 않습니다.");
+      }
     } catch (error) {
       console.error("에피그램 생성 실패:", error);
 
@@ -195,7 +246,7 @@ export const epigramService = {
 
   // 좋아요 토글
   toggleLike: async (id: number, isLiked: boolean) => {
-    const url = `https://fe-project-epigram-api.vercel.app/14-차경훈/epigrams/${id}/like`;
+    const url = `https://fe-project-epigram-api.vercel.app/14-7/epigrams/${id}/like`;
     const response = await fetch(url, {
       method: isLiked ? "DELETE" : "POST",
       headers: { "Content-Type": "application/json" },

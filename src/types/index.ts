@@ -27,6 +27,12 @@ export interface AuthResponse {
   user: User;
 }
 
+// Tag Type
+export interface Tag {
+  id: number;
+  name: string;
+}
+
 // Epigram Types
 export interface Epigram {
   id: number;
@@ -34,7 +40,7 @@ export interface Epigram {
   author: string;
   referenceTitle?: string;
   referenceUrl?: string;
-  tags: string[];
+  tags: Tag[];
   writerId: number;
   likeCount: number;
   isLiked: boolean;

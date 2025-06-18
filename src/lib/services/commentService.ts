@@ -1,12 +1,10 @@
-import api from "./api";
+import api, { TEAM_ID } from "../api";
 import {
   Comment,
   CreateCommentRequest,
   ApiResponse,
   PaginatedResponse,
 } from "@/types";
-
-const TEAM_ID = "14-차경훈";
 
 export const commentService = {
   // 댓글 목록 조회

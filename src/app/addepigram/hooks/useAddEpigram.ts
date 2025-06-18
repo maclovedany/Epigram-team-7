@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { epigramService } from "@/lib/services/epigramService";
 import { useAuthStore } from "@/store/authStore";
+import { useEpigramStore } from "@/store/epigramStore";
 
 export interface EpigramFormData {
   content: string;
@@ -21,6 +22,7 @@ export interface ValidationErrors {
 export function useAddEpigram() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const { addEpigram } = useEpigramStore();
 
   // 인증 확인
   useEffect(() => {
@@ -118,16 +120,32 @@ export function useAddEpigram() {
 
     setIsSubmitting(true);
     try {
-      await epigramService.createEpigram({
+      const newEpigram = await epigramService.createEpigram({
         content,
         author: authorType === "직접입력" ? author : authorType,
         referenceTitle,
         referenceUrl,
         tags,
       });
+
+      // 새로 생성된 에피그램을 스토어에 추가
+      addEpigram(newEpigram);
+
+      // 피드목록 페이지로 이동
       router.push("/epigramlist");
-    } catch {
-      setError("에피그램 저장에 실패했습니다.");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "에피그램 저장에 실패했습니다.";
+
+      // 로그인 관련 에러인 경우 로그인 페이지로 리디렉션
+      if (errorMessage.includes("로그인") || errorMessage.includes("인증")) {
+        router.push("/login");
+        return;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
