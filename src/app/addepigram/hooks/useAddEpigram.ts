@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { epigramService } from "@/lib/services/epigramService";
+import { useAuthStore } from "@/store/authStore";
 
 export interface EpigramFormData {
   content: string;
@@ -19,6 +20,14 @@ export interface ValidationErrors {
 
 export function useAddEpigram() {
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  // 인증 확인
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
 
   // Form state
   const [content, setContent] = useState("");
@@ -58,9 +67,9 @@ export function useAddEpigram() {
       if (
         tags.length < 3 &&
         tagInput.length <= 10 &&
-        !tags.includes(tagInput)
+        !tags.includes(tagInput.trim())
       ) {
-        setTags([...tags, tagInput]);
+        setTags([...tags, tagInput.trim()]);
         setTagInput("");
       }
     }
@@ -109,6 +118,7 @@ export function useAddEpigram() {
     setAuthor,
     setReferenceTitle,
     setReferenceUrl,
+    setTags,
     setTagInput,
 
     // Validation

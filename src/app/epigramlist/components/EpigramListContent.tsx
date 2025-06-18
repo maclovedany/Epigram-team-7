@@ -1,33 +1,29 @@
+import { useEpigramList } from "../hooks/useEpigramList";
 import { EpigramCard } from "./EpigramCard";
+import { LoadMoreButton, FloatingActionButton } from "./";
 import { LoadingSpinner, ErrorMessage, EmptyState } from "@/components/ui";
-import { Epigram } from "@/types";
 
-interface EpigramListContentProps {
-  epigrams: Epigram[];
-  isLoading: boolean;
-  hasMore: boolean;
-  error: string;
-  isAuthenticated: boolean;
-  onEpigramClick: (epigramId: number) => void;
-  onLoadMore: () => void;
-  onRefresh: () => void;
-}
+export const EpigramListContent = () => {
+  const {
+    epigrams,
+    isLoading,
+    hasMore,
+    error,
+    isAuthenticated,
+    handleEpigramClick,
+    loadMore,
+    refresh,
+  } = useEpigramList();
 
-export const EpigramListContent = ({
-  epigrams,
-  isLoading,
-  hasMore,
-  error,
-  isAuthenticated,
-  onEpigramClick,
-  onLoadMore,
-  onRefresh,
-}: EpigramListContentProps) => {
   return (
-    <>
+    <main className="max-w-6xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">피드</h1>
+      </div>
+
       {/* 에러 메시지 */}
       {error && (
-        <ErrorMessage message={error} onRetry={onRefresh} className="mb-6" />
+        <ErrorMessage message={error} onRetry={refresh} className="mb-6" />
       )}
 
       {/* 에피그램 목록 - 2열 그리드 */}
@@ -36,7 +32,7 @@ export const EpigramListContent = ({
           <EpigramCard
             key={epigram.id}
             epigram={epigram}
-            onClick={() => onEpigramClick(epigram.id)}
+            onClick={() => handleEpigramClick(epigram.id)}
           />
         ))}
       </div>
@@ -58,27 +54,14 @@ export const EpigramListContent = ({
       )}
 
       {/* 더보기 버튼 */}
-      {hasMore && epigrams.length > 0 && (
-        <div className="text-center mt-12">
-          <button
-            onClick={onLoadMore}
-            disabled={isLoading}
-            className="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span className="ml-2">로딩 중...</span>
-              </>
-            ) : (
-              <>
-                <span className="mr-2">+</span>
-                에피그램 더보기
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </>
+      <LoadMoreButton
+        hasMore={hasMore}
+        isLoading={isLoading}
+        onLoadMore={loadMore}
+      />
+
+      {/* 플로팅 액션 버튼 */}
+      <FloatingActionButton isAuthenticated={isAuthenticated} />
+    </main>
   );
 };
