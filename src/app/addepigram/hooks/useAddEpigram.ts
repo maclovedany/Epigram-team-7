@@ -141,8 +141,20 @@ export function useAddEpigram() {
     e.preventDefault();
     if (isFormInvalid) return;
 
+    console.log("=== 에피그램 제출 시작 ===");
+    console.log("제출 데이터:", {
+      content,
+      author: authorType === "직접입력" ? author : authorType,
+      referenceTitle,
+      referenceUrl,
+      tags,
+    });
+
     setIsSubmitting(true);
+    setError(""); // 기존 에러 초기화
+
     try {
+      console.log("API 호출 시작...");
       const newEpigram = await epigramService.createEpigram({
         content,
         author: authorType === "직접입력" ? author : authorType,
@@ -151,25 +163,46 @@ export function useAddEpigram() {
         tags,
       });
 
+      console.log("에피그램 생성 성공:", newEpigram);
+
       // 새로 생성된 에피그램을 스토어에 추가
+      console.log("스토어에 에피그램 추가 중...");
       addEpigram(newEpigram);
 
-      // 피드목록 페이지로 이동
+      console.log("성공! 에피그램이 저장되었습니다.");
+
+      console.log("피드 페이지로 이동 중...");
+
+      // Next.js 라우터로 이동
       router.push("/epigramlist");
     } catch (error) {
+      console.error("에피그램 생성 실패:", error);
+
       const errorMessage =
         error instanceof Error
           ? error.message
           : "에피그램 저장에 실패했습니다.";
 
+      console.log("에러 메시지:", errorMessage);
+
+      // 팀 정보 변경 에러인 경우 - 자동 리다이렉트하지 않고 에러 표시
+      if (errorMessage.includes("팀 정보가 변경되었습니다")) {
+        console.log("팀 정보 변경 에러 - 자동 리다이렉트 처리됨");
+        // 자동 리다이렉트가 처리되므로 여기서는 특별한 처리 불필요
+        return;
+      }
+
       // 로그인 관련 에러인 경우 로그인 페이지로 리디렉션
       if (errorMessage.includes("로그인") || errorMessage.includes("인증")) {
+        console.log("로그인 관련 에러 - 로그인 페이지로 이동");
         router.push("/login");
         return;
       }
 
+      console.log("일반 에러 - 에러 상태 설정");
       setError(errorMessage);
     } finally {
+      console.log("제출 완료 - 로딩 상태 해제");
       setIsSubmitting(false);
     }
   };

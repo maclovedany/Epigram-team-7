@@ -106,16 +106,27 @@ export default function EpigramDetailContent({
               <button
                 onClick={onLike}
                 disabled={isLiking}
-                className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full transition-colors hover:bg-gray-800"
+                className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full transition-colors hover:bg-gray-800 disabled:opacity-50"
               >
                 <img src="/like.png" alt="좋아요" className="w-5 h-5" />
                 <span>{epigram.likeCount || 0}</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full">
+              <button
+                onClick={() => {
+                  if (
+                    confirm(
+                      "좋아요를 누르려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+                    )
+                  ) {
+                    window.location.href = "/login";
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 h-10 bg-black text-white rounded-full transition-colors hover:bg-gray-800 cursor-pointer"
+              >
                 <img src="/like.png" alt="좋아요" className="w-5 h-5" />
                 <span>{epigram.likeCount || 0}</span>
-              </div>
+              </button>
             )}
 
             {/* 출처 버튼 */}

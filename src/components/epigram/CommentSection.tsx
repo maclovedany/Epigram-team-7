@@ -27,6 +27,8 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
   const { isAuthenticated, user } = useAuthStore();
 
+  console.log("CommentSection - 인증 상태:", { isAuthenticated, user });
+
   const {
     register,
     handleSubmit,
@@ -59,7 +61,13 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
 
   // 댓글 작성
   const onSubmitComment = async (data: CreateCommentFormData) => {
-    if (!isAuthenticated) return;
+    console.log("댓글 작성 시도:", { isAuthenticated, data });
+
+    if (!isAuthenticated) {
+      console.log("인증되지 않음 - 댓글 작성 중단");
+      setError("로그인이 필요합니다.");
+      return;
+    }
 
     try {
       const commentData = {
@@ -67,10 +75,15 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
         epigramId: parseInt(epigramId),
         isPrivate: false,
       };
+
+      console.log("댓글 서비스 호출:", commentData);
       await commentService.createComment(epigramId, commentData);
+      console.log("댓글 작성 성공");
+
       reset();
       loadComments(); // 댓글 목록 새로고침
     } catch (err) {
+      console.error("댓글 작성 에러:", err);
       const errorMessage =
         err instanceof Error ? err.message : "댓글 작성에 실패했습니다.";
       setError(errorMessage);
@@ -187,8 +200,14 @@ export default function CommentSection({ epigramId }: CommentSectionProps) {
               </div>
             </form>
           ) : (
-            <div className="text-center py-6 text-gray-500">
-              <p>댓글을 작성하려면 로그인이 필요합니다.</p>
+            <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-lg">
+              <p className="mb-3">댓글을 작성하려면 로그인이 필요합니다.</p>
+              <button
+                onClick={() => (window.location.href = "/login")}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                로그인하기
+              </button>
             </div>
           )}
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { epigramService } from "@/lib/api";
+import { epigramService } from "@/lib/services/epigramService";
 import { useAuthStore } from "@/store/authStore";
 import { Epigram } from "@/types";
 

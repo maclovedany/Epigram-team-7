@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui";
 import { useAuthStore } from "@/store/authStore";
-import { authService } from "@/lib/api";
+import { authService } from "@/lib/services/authService";
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();

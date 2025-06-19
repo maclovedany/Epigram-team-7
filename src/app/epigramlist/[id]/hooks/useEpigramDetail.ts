@@ -46,22 +46,57 @@ export function useEpigramDetail() {
 
     try {
       setIsLiking(true);
+      console.log("좋아요 토글 시작:", {
+        epigramId: epigram.id,
+        currentIsLiked: epigram.isLiked,
+      });
+
       const result = await epigramService.toggleLike(
         epigram.id,
         epigram.isLiked
       );
-      setEpigram({
-        ...epigram,
-        isLiked: result.isLiked,
-        likeCount: result.likeCount,
-      });
+
+      console.log("좋아요 토글 결과:", result);
+
+      // API가 전체 에피그램 객체를 반환하는 경우
+      if (result && typeof result === "object" && "id" in result) {
+        console.log("전체 에피그램 객체로 업데이트");
+        setEpigram(result as Epigram);
+      }
+      // API가 좋아요 정보만 반환하는 경우
+      else if (
+        result &&
+        typeof result === "object" &&
+        ("isLiked" in result || "likeCount" in result)
+      ) {
+        console.log("좋아요 정보만으로 업데이트");
+        setEpigram({
+          ...epigram,
+          isLiked: result.isLiked ?? !epigram.isLiked,
+          likeCount: result.likeCount ?? epigram.likeCount,
+        });
+      }
+      // fallback: 단순히 토글
+      else {
+        console.log("fallback: 단순 토글");
+        setEpigram({
+          ...epigram,
+          isLiked: !epigram.isLiked,
+          likeCount: epigram.isLiked
+            ? epigram.likeCount - 1
+            : epigram.likeCount + 1,
+        });
+      }
     } catch (err) {
       console.error("좋아요 처리 실패:", err);
       const errorMessage =
         err instanceof Error ? err.message : "좋아요 처리에 실패했습니다.";
 
-      // 401 에러가 아닌 경우에만 에러 메시지 표시
-      if (!errorMessage.includes("로그인")) {
+      // 로그인 관련 에러인 경우 리다이렉트 또는 알림
+      if (errorMessage.includes("로그인") || errorMessage.includes("인증")) {
+        alert("로그인이 필요합니다.");
+        router.push("/login");
+      } else {
         alert(errorMessage);
       }
     } finally {

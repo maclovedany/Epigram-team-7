@@ -122,6 +122,40 @@ export const epigramService = {
         console.error("응답 데이터:", axiosError.response.data);
         console.error("응답 상태:", axiosError.response.status);
 
+        // 403 에러인 경우 토큰 문제일 수 있으므로 토큰 제거 후 재시도
+        if (axiosError.response.status === 403) {
+          console.log("403 에러 - 토큰 문제일 수 있어 토큰 제거 후 재시도");
+
+          // 토큰 제거
+          localStorage.removeItem("authToken");
+          sessionStorage.removeItem("authToken");
+
+          // 토큰 없이 재시도
+          try {
+            console.log("토큰 없이 재시도:", `/${TEAM_ID}/epigrams/${id}`);
+            const retryResponse = await api.get<Epigram>(
+              `/${TEAM_ID}/epigrams/${id}`
+            );
+
+            console.log("재시도 성공:", retryResponse.data);
+
+            if (
+              retryResponse.data &&
+              typeof retryResponse.data === "object" &&
+              "id" in retryResponse.data
+            ) {
+              return retryResponse.data as Epigram;
+            } else if (retryResponse.data && (retryResponse.data as any).data) {
+              return (retryResponse.data as any).data;
+            }
+          } catch (retryError) {
+            console.error("재시도도 실패:", retryError);
+            throw new Error(
+              "에피그램을 불러올 수 없습니다. 권한이 없거나 존재하지 않는 에피그램입니다."
+            );
+          }
+        }
+
         if (axiosError.response.status === 404) {
           throw new Error("요청한 에피그램이 존재하지 않습니다.");
         }
@@ -167,15 +201,26 @@ export const epigramService = {
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
           const currentTime = Math.floor(Date.now() / 1000);
+
+          console.log("=== 토큰 디버깅 정보 ===");
+          console.log("토큰 페이로드:", payload);
+          console.log("토큰의 팀 ID:", payload.teamId);
+          console.log("현재 설정된 TEAM_ID:", TEAM_ID);
+          console.log(
+            "팀 ID 타입 비교:",
+            typeof payload.teamId,
+            "vs",
+            typeof TEAM_ID
+          );
+          console.log("팀 ID 일치 여부:", payload.teamId === TEAM_ID);
           console.log("토큰 만료 시간:", new Date(payload.exp * 1000));
           console.log("현재 시간:", new Date());
           console.log("토큰 만료 여부:", currentTime > payload.exp);
-          console.log("토큰의 teamId:", payload.teamId);
-          console.log("현재 설정된 TEAM_ID:", TEAM_ID);
+          console.log("========================");
 
-          // 토큰 만료 확인
+          // 토큰이 만료된 경우
           if (currentTime > payload.exp) {
-            console.log("토큰이 만료되었습니다.");
+            console.log("토큰이 만료되어 제거합니다.");
             localStorage.removeItem("authToken");
             throw new Error("토큰이 만료되었습니다. 다시 로그인해주세요.");
           }
@@ -183,10 +228,15 @@ export const epigramService = {
           // 팀 ID 불일치 확인
           if (payload.teamId !== TEAM_ID) {
             console.log("토큰의 팀 ID와 현재 설정된 팀 ID가 다릅니다.");
+            console.log("기존 토큰을 삭제하고 로그인 페이지로 이동합니다.");
             localStorage.removeItem("authToken");
-            throw new Error(
-              "인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
-            );
+
+            // 로그인 페이지로 자동 리다이렉트
+            if (typeof window !== "undefined") {
+              window.location.href = "/login?reason=team_changed";
+            }
+
+            throw new Error("팀 정보가 변경되었습니다. 다시 로그인해주세요.");
           }
         } catch (e) {
           console.log("토큰 검증 실패:", e);
@@ -317,9 +367,13 @@ export const epigramService = {
           if (payload.teamId !== TEAM_ID) {
             console.log("팀 ID가 일치하지 않아 토큰을 제거합니다.");
             localStorage.removeItem("authToken");
-            throw new Error(
-              "인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
-            );
+
+            // 로그인 페이지로 자동 리다이렉트
+            if (typeof window !== "undefined") {
+              window.location.href = "/login?reason=team_changed";
+            }
+
+            throw new Error("팀 정보가 변경되었습니다. 다시 로그인해주세요.");
           }
         } catch (e) {
           console.error("토큰 파싱 실패:", e);
