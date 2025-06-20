@@ -24,4 +24,4 @@ export { default as ErrorMessage } from "./ErrorMessage";
 export { default as EmptyState } from "./EmptyState";
 
 // Epigram Components
-export { default as CommentSection } from "../epigram/CommentSection";
+export { default as CommentSection } from "./CommentSection";

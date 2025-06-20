@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { epigramService } from "@/lib/services/epigramService";
-import { useAuthStore } from "@/store/authStore";
-import { Epigram } from "@/types";
+import { useState, useEffect, useCallback } from "react";
+import { useFormValidation } from "@/app/addepigram/hooks/useFormValidation";
+import { useTagManager } from "@/app/addepigram/hooks/useTagManager";
+import { useEpigramLoader } from "./useEpigramLoader";
+import { useUpdateEpigram } from "./useUpdateEpigram";
 
 export interface EditFormData {
   content: string;
@@ -13,220 +13,101 @@ export interface EditFormData {
 }
 
 export function useEditEpigram() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>("");
-  const [epigram, setEpigram] = useState<Epigram | null>(null);
+  // 에피그램 로딩
+  const { epigram, isLoading, error: loadError } = useEpigramLoader();
 
-  const params = useParams();
-  const router = useRouter();
-  const { user } = useAuthStore();
-
-  const epigramId = params.id as string;
-
-  // Form state
+  // 폼 상태
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
   const [referenceTitle, setReferenceTitle] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
 
-  // Validation
-  const contentError = content.length > 500 ? "500자 이내로 입력해주세요." : "";
-  const authorError = author.trim() === "" ? "저자 이름을 입력해주세요." : "";
-  const tagError =
-    tags.length > 3
-      ? "태그는 최대 3개까지 추가할 수 있습니다."
-      : tags.some((t) => t.length > 10)
-      ? "태그는 10자 이내여야 합니다."
-      : "";
+  // 분리된 훅들 사용
+  const tagManager = useTagManager();
+  const validation = useFormValidation({
+    content,
+    authorType: "직접입력", // 편집 시에는 항상 직접입력
+    author,
+    tags: tagManager.tags,
+  });
+  const {
+    isSubmitting,
+    error: submitError,
+    updateEpigram,
+  } = useUpdateEpigram(epigram?.id);
 
-  const isFormInvalid =
-    !!contentError ||
-    !!authorError ||
-    !!tagError ||
-    content.trim() === "" ||
-    author.trim() === "";
+  // 에피그램 데이터 초기화 함수
+  const initializeFormData = useCallback(() => {
+    if (epigram) {
+      setContent(epigram.content);
+      setAuthor(epigram.author);
+      setReferenceTitle(epigram.referenceTitle || "");
+      setReferenceUrl(epigram.referenceUrl || "");
 
-  // 에피그램 로드
+      // 태그 객체 배열을 문자열 배열로 변환
+      const tagStrings = epigram.tags
+        ? epigram.tags.map((tag) => tag.name)
+        : [];
+      tagManager.setTags(tagStrings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [epigram, tagManager.setTags]);
+
+  // 에피그램 데이터가 로드되면 폼에 설정
   useEffect(() => {
-    const loadEpigramData = async () => {
-      if (!epigramId) return;
+    initializeFormData();
+  }, [initializeFormData]);
 
-      try {
-        setIsLoading(true);
-        const data = await epigramService.getEpigramById(epigramId);
-
-        // 현재 사용자가 작성자인지 확인
-        console.log("현재 사용자:", user);
-        console.log("에피그램 작성자 ID:", data.writerId);
-        console.log("사용자 ID 타입:", typeof user?.id);
-        console.log("작성자 ID 타입:", typeof data.writerId);
-        console.log("ID 비교 결과:", user?.id === data.writerId);
-
-        // 임시로 권한 검증 비활성화 - 디버깅용
-        /*
-        if (!user || user.id !== data.writerId) {
-          console.log("권한 없음: 목록으로 리다이렉트");
-          router.push("/epigramlist");
-          return;
-        }
-        */
-
-        setEpigram(data);
-        // 폼에 기존 데이터 설정
-        setContent(data.content);
-        setAuthor(data.author);
-        setReferenceTitle(data.referenceTitle || "");
-        setReferenceUrl(data.referenceUrl || "");
-        // 태그 객체 배열을 문자열 배열로 변환
-        setTags(data.tags ? data.tags.map((tag) => tag.name) : []);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "에피그램을 불러올 수 없습니다.";
-        setError(errorMessage);
-        router.push("/epigramlist");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadEpigramData();
-  }, [epigramId, user, router]);
-
-  // Tag management
-  const addTag = (cleanInput: string) => {
-    // 쉼표 제거하고 트림
-    cleanInput = cleanInput.replace(/,/g, "").trim();
-    // 특수문자 제거 (한글, 영문, 숫자만 허용)
-    cleanInput = cleanInput.replace(/[^a-zA-Z0-9가-힣]/g, "");
-
-    if (
-      cleanInput &&
-      tags.length < 3 &&
-      cleanInput.length <= 10 &&
-      !tags.includes(cleanInput)
-    ) {
-      console.log("Adding tag:", cleanInput, { currentTags: tags, tagInput });
-      setTags((prevTags) => [...prevTags, cleanInput]); // 함수형 업데이트
-      setTagInput("");
-    } else {
-      console.log("Tag not added:", {
-        cleanInput,
-        currentTags: tags,
-        tagInput,
-      });
-      setTagInput("");
-    }
-  };
-
-  const handleTagKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    isComposing: boolean
-  ) => {
-    if (isComposing) {
-      console.log("Ignoring keydown due to composition:", {
-        key: e.key,
-        input: tagInput,
-      });
-      return; // 조합 중에는 모든 키 이벤트 무시
-    }
-
-    console.log("handleTagKeyDown:", { key: e.key, input: tagInput });
-    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
-      e.preventDefault();
-      addTag(tagInput);
-    } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
-      e.preventDefault();
-      handleTagRemove(tags[tags.length - 1]);
-    }
-  };
-
-  const handleTagRemove = (tag: string) => {
-    console.log("Removing tag:", tag, { currentTags: tags });
-    setTags((prevTags) => prevTags.filter((t) => t !== tag));
-  };
-
-  const handleTagInputChange = (value: string) => {
-    console.log("handleTagInputChange:", { value, currentTagInput: tagInput });
-    // 쉼표가 포함된 경우, 쉼표 이전 값으로 태그 추가 시도
-    if (value.includes(",")) {
-      const cleanValue = value.replace(/,/g, "").trim();
-      if (cleanValue) {
-        addTag(cleanValue);
-      } else {
-        setTagInput("");
-      }
-    } else {
-      setTagInput(value.slice(0, 10)); // 10자 제한
-    }
-  };
-
-  // Form submission
+  // 폼 제출
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!epigram || isFormInvalid) return;
+    if (!epigram || validation.isFormInvalid) return;
 
-    try {
-      setError("");
-      setIsSubmitting(true);
+    const submitData = {
+      content,
+      author,
+      referenceTitle,
+      referenceUrl,
+      tags: tagManager.tags,
+    };
 
-      const submitData = {
-        content,
-        author,
-        referenceTitle: referenceTitle.trim() || undefined,
-        referenceUrl: referenceUrl.trim() || undefined,
-        tags,
-      };
-
-      await epigramService.updateEpigram(epigram.id.toString(), submitData);
-      router.push(`/epigramlist/${epigram.id}`);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "수정에 실패했습니다.";
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await updateEpigram(submitData);
   };
 
+  const error = loadError || submitError;
+
   return {
-    // State
+    // 상태
     isLoading,
     isSubmitting,
     error,
     epigram,
 
-    // Form data
+    // 폼 데이터
     formData: {
       content,
       author,
       referenceTitle,
       referenceUrl,
-      tags,
-      tagInput,
+      tags: tagManager.tags,
+      tagInput: tagManager.tagInput,
     },
 
-    // Form setters
+    // 폼 세터
     setContent,
     setAuthor,
     setReferenceTitle,
     setReferenceUrl,
-    setTagInput,
+    setTags: tagManager.setTags,
+    setTagInput: tagManager.setTagInput,
 
-    // Validation
-    validation: {
-      contentError,
-      authorError,
-      tagError,
-      isFormInvalid,
-    },
+    // 유효성 검증
+    validation,
 
-    // Handlers
-    handleTagKeyDown,
-    handleTagRemove,
-    handleTagInputChange,
+    // 핸들러
+    handleTagKeyDown: tagManager.handleTagKeyDown,
+    handleTagInputChange: tagManager.handleTagInputChange,
+    handleTagRemove: tagManager.removeTag,
     handleSubmit,
   };
 }

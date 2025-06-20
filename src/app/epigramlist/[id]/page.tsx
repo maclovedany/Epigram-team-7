@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
-import CommentSection from "@/components/epigram/CommentSection";
+import { CommentSection } from "@/components/ui";
 import {
   EpigramDetailContent,
   LoadingSkeleton,
