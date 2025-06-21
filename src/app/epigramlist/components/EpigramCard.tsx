@@ -1,11 +1,17 @@
 import { Epigram, Tag } from "@/types";
+import { highlightText } from "../utils/highlightText";
 
 interface EpigramCardProps {
   epigram: Epigram;
   onClick?: () => void;
+  searchQuery?: string;
 }
 
-export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
+export function EpigramCard({
+  epigram,
+  onClick,
+  searchQuery = "",
+}: EpigramCardProps) {
   return (
     <div className="space-y-3 cursor-pointer" onClick={onClick}>
       {/* 에피그램 카드 */}
@@ -21,14 +27,14 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
         {/* 에피그램 내용 */}
         <div className="flex-grow overflow-hidden">
           <p className="text-lg text-gray-900 leading-relaxed">
-            {epigram.content}
+            {highlightText(epigram.content, searchQuery)}
           </p>
         </div>
 
         {/* 저자 */}
         <div>
           <p className="text-right text-sm" style={{ color: "#ABB8CE" }}>
-            - {epigram.author} -
+            - {highlightText(epigram.author, searchQuery)} -
           </p>
         </div>
       </div>
@@ -41,7 +47,7 @@ export function EpigramCard({ epigram, onClick }: EpigramCardProps) {
             className="inline-block px-3 py-1 text-sm"
             style={{ color: "#ABB8CE" }}
           >
-            #{tag.name}
+            #{highlightText(tag.name, searchQuery)}
           </span>
         ))}
       </div>

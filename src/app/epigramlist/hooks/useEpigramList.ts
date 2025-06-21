@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useEpigrams } from "@/hooks";
 import { useAuthStore } from "@/store/authStore";
 import { useEpigramStore } from "@/store/epigramStore";
+import { searchInText } from "../utils/highlightText";
 
 export const useEpigramList = () => {
   const { epigrams, isLoading, hasMore, error, loadMore, refresh } =
@@ -10,6 +11,7 @@ export const useEpigramList = () => {
   const { isAuthenticated } = useAuthStore();
   const { setEpigrams } = useEpigramStore();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // 에피그램 목록이 로드되면 스토어에도 저장
   React.useEffect(() => {
@@ -30,18 +32,49 @@ export const useEpigramList = () => {
     router.push("/addepigram");
   };
 
+  // 검색 필터링된 에피그램 목록
+  const filteredEpigrams = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return epigrams.filter((epigram) => epigram && epigram.id);
+    }
+
+    return epigrams.filter((epigram) => {
+      if (!epigram || !epigram.id) return false;
+
+      // 본문 내용에서 검색
+      const contentMatch = searchInText(epigram.content, searchQuery);
+
+      // 저자에서 검색
+      const authorMatch = searchInText(epigram.author, searchQuery);
+
+      // 태그에서 검색
+      const tagMatch = epigram.tags.some((tag) =>
+        searchInText(tag.name, searchQuery)
+      );
+
+      return contentMatch || authorMatch || tagMatch;
+    });
+  }, [epigrams, searchQuery]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return {
-    // Data - 훅의 에피그램을 직접 사용 (스토어는 캐싱용으로만 사용)
-    epigrams,
+    // Data - 검색 필터링된 에피그램 사용
+    epigrams: filteredEpigrams,
+    originalEpigrams: epigrams,
     isLoading,
     hasMore,
     error,
     isAuthenticated,
+    searchQuery,
 
     // Actions
     loadMore,
     refresh,
     handleEpigramClick,
     handleCreateEpigram,
+    handleSearch,
   };
 };
