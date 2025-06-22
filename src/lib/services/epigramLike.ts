@@ -1,10 +1,10 @@
-import api, { TEAM_ID } from "../api";
+import api from "../api";
 
 export const epigramLike = {
   // 좋아요 토글
   toggleLike: async (epigramId: number): Promise<any> => {
     try {
-      const response = await api.post(`/${TEAM_ID}/epigrams/${epigramId}/like`);
+      const response = await api.post(`/epigrams/${epigramId}/like`);
 
       return response.data;
     } catch (error) {

@@ -1,4 +1,4 @@
-import api, { TEAM_ID } from "../api";
+import api from "../api";
 import { Comment, CreateCommentRequest } from "@/types";
 
 export const commentService = {
@@ -6,7 +6,7 @@ export const commentService = {
   async getComments(epigramId: string, limit: number = 10): Promise<Comment[]> {
     try {
       console.log(`댓글 목록 요청: 에피그램 ID ${epigramId}, limit: ${limit}`);
-      const response = await api.get(`/${TEAM_ID}/comments`, {
+      const response = await api.get("/comments", {
         params: {
           epigramId: parseInt(epigramId),
           limit: limit,
@@ -36,7 +36,7 @@ export const commentService = {
   ): Promise<Comment> {
     try {
       console.log("댓글 작성 요청:", { epigramId, data });
-      const response = await api.post(`/${TEAM_ID}/comments`, {
+      const response = await api.post("/comments", {
         ...data,
         epigramId: parseInt(epigramId),
       });
@@ -65,10 +65,7 @@ export const commentService = {
   ): Promise<Comment> {
     try {
       console.log("댓글 수정 요청:", { commentId, data });
-      const response = await api.patch(
-        `/${TEAM_ID}/comments/${commentId}`,
-        data
-      );
+      const response = await api.patch(`/comments/${commentId}`, data);
       console.log("댓글 수정 응답:", response.data);
       return response.data;
     } catch (error: unknown) {
@@ -91,7 +88,7 @@ export const commentService = {
   async deleteComment(commentId: number): Promise<void> {
     try {
       console.log("댓글 삭제 요청:", commentId);
-      await api.delete(`/${TEAM_ID}/comments/${commentId}`);
+      await api.delete(`/comments/${commentId}`);
       console.log("댓글 삭제 완료");
     } catch (error: unknown) {
       console.error("댓글 삭제 실패:", error);

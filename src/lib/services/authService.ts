@@ -1,4 +1,4 @@
-import api, { TEAM_ID } from "../api";
+import api from "../api";
 import {
   LoginRequest,
   SignupRequest,
@@ -12,7 +12,7 @@ export const authService = {
     try {
       console.log("Login request:", credentials);
       const response = await api.post<ApiResponse<AuthResponse>>(
-        `/${TEAM_ID}/auth/signIn`,
+        "/auth/login",
         credentials
       );
       console.log("Login response:", response.data);
@@ -70,7 +70,7 @@ export const authService = {
       // 서버에서 passwordConfirmation 필드를 요구하므로 모든 필드를 포함
       console.log("Signup request:", data);
       const response = await api.post<ApiResponse<AuthResponse>>(
-        `/${TEAM_ID}/auth/signUp`,
+        "/auth/signup",
         data
       );
       console.log("Signup response:", response.data);
@@ -144,7 +144,7 @@ export const authService = {
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     try {
       const response = await api.post<ApiResponse<AuthResponse>>(
-        `/${TEAM_ID}/auth/refresh-token`,
+        "/auth/refresh-token",
         { refreshToken }
       );
       return response.data.data;
@@ -160,7 +160,7 @@ export const authService = {
   // 로그아웃
   logout: async (): Promise<void> => {
     try {
-      await api.post(`/${TEAM_ID}/auth/signOut`);
+      await api.post("/auth/logout");
     } catch (error) {
       console.warn("서버 로그아웃 요청 실패:", error);
     }

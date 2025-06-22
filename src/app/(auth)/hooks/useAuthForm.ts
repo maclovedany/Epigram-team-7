@@ -54,24 +54,11 @@ export function useAuthForm<T extends z.ZodSchema>({
         throw new Error("사용자 정보를 받을 수 없습니다.");
       }
 
-      if (!response.accessToken) {
-        throw new Error("인증 토큰을 받을 수 없습니다.");
-      }
+      // 토큰은 httpOnly 쿠키로 자동 관리되므로 검증 불필요
 
       if (mode === "login") {
-        // 로그인 성공 시 기존 토큰 완전 제거 후 새 토큰 저장
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("authToken");
-          sessionStorage.removeItem("authToken");
-        }
-        login(response.user, response.accessToken);
-
-        // 토큰 저장 확인
-        setTimeout(() => {
-          const savedToken = localStorage.getItem("authToken");
-          console.log("로그인 후 저장된 토큰:", savedToken);
-        }, 100);
-
+        // 로그인 성공 시 사용자 정보 저장 (토큰은 쿠키로 자동 관리)
+        login(response.user);
         router.push("/epigramlist");
       } else {
         // 회원가입 성공 시 로그인 페이지로 이동

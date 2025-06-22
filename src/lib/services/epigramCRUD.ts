@@ -1,4 +1,4 @@
-import api, { TEAM_ID } from "../api";
+import api from "../api";
 import { Epigram, ApiResponse, PaginatedResponse } from "@/types";
 
 export const epigramCRUD = {
@@ -11,7 +11,7 @@ export const epigramCRUD = {
   }): Promise<PaginatedResponse<Epigram>> => {
     try {
       const response = await api.get<ApiResponse<PaginatedResponse<Epigram>>>(
-        `/${TEAM_ID}/epigrams`,
+        "/epigrams",
         { params }
       );
 
@@ -76,7 +76,7 @@ export const epigramCRUD = {
   // 에피그램 상세 조회
   getEpigramById: async (id: string): Promise<Epigram> => {
     try {
-      const response = await api.get<Epigram>(`/${TEAM_ID}/epigrams/${id}`);
+      const response = await api.get<Epigram>(`/epigrams/${id}`);
 
       // 응답 구조 확인 및 처리
       if (
@@ -120,10 +120,7 @@ export const epigramCRUD = {
     tags: string[];
   }): Promise<Epigram> => {
     try {
-      const response = await api.post<ApiResponse<Epigram>>(
-        `/${TEAM_ID}/epigrams`,
-        data
-      );
+      const response = await api.post<ApiResponse<Epigram>>("/epigrams", data);
 
       if (response.data && (response.data as any).data) {
         return (response.data as any).data;
@@ -167,8 +164,8 @@ export const epigramCRUD = {
     }
   ): Promise<Epigram> => {
     try {
-      const response = await api.patch<ApiResponse<Epigram>>(
-        `/${TEAM_ID}/epigrams/${id}`,
+      const response = await api.put<ApiResponse<Epigram>>(
+        `/epigrams/${id}`,
         data
       );
 
@@ -205,7 +202,7 @@ export const epigramCRUD = {
   // 에피그램 삭제
   deleteEpigram: async (id: string): Promise<void> => {
     try {
-      await api.delete(`/${TEAM_ID}/epigrams/${id}`);
+      await api.delete(`/epigrams/${id}`);
     } catch (error) {
       const axiosError = error as any;
 
