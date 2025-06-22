@@ -14,7 +14,7 @@ export const useAuth = () => {
         setLoading(true);
         const response = await authService.login(credentials);
 
-        login(response.user, response.accessToken);
+        login(response.user);
         router.push("/epigramlist");
 
         return { success: true };
@@ -35,7 +35,7 @@ export const useAuth = () => {
         setLoading(true);
         const response = await authService.signup(data);
 
-        login(response.user, response.accessToken);
+        login(response.user);
         router.push("/epigramlist");
 
         return { success: true };

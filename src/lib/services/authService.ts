@@ -22,9 +22,7 @@ export const authService = {
         return response.data.data;
       } else if (
         response.data &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (response.data as any).user &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (response.data as any).accessToken
       ) {
         // 직접 응답 구조인 경우 (data wrapper 없음)
@@ -39,7 +37,6 @@ export const authService = {
 
       // Axios 에러 처리
       if (error && typeof error === "object" && "response" in error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axiosError = error as any;
         const status = axiosError.response?.status;
         const responseData = axiosError.response?.data;
@@ -80,9 +77,7 @@ export const authService = {
         return response.data.data;
       } else if (
         response.data &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (response.data as any).user &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (response.data as any).accessToken
       ) {
         // 직접 응답 구조인 경우 (data wrapper 없음)
@@ -97,7 +92,6 @@ export const authService = {
 
       // Axios 에러 처리
       if (error && typeof error === "object" && "response" in error) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axiosError = error as any;
         const status = axiosError.response?.status;
         const responseData = axiosError.response?.data;
@@ -114,7 +108,6 @@ export const authService = {
           let errorMessage = responseData.message;
           if (responseData.details) {
             const detailMessages = Object.entries(responseData.details)
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map(([field, detail]: [string, any]) => {
                 if (typeof detail === "object" && detail.message) {
                   return `${field}: ${detail.message}`;

@@ -4,14 +4,10 @@ import Link from "next/link";
 import { Button, Input } from "@/components/ui";
 import { z } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface AuthFormProps<T extends z.ZodSchema = any> {
   mode: "login" | "signup";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleSubmit: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any;
   isSubmitting: boolean;
   apiError: string;
