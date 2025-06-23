@@ -140,7 +140,7 @@ export const authService = {
 
       // 네이버 액세스 토큰 요청
       const tokenResponse = await fetch(
-        "https://epigram-team-7.vercel.app/14-98/auth/signIn/NAVER/token",
+        "https://epigram-team-7.vercel.app/14-98/auth/signIn/NAVER",
         {
           method: "POST",
           headers: {
@@ -150,6 +150,7 @@ export const authService = {
             redirectUri:
               "https://epigram-team-7.vercel.app/api/auth/naver/callback",
             token: code,
+            state,
           }),
         }
       );
