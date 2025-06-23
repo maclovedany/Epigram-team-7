@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 네이버 OAuth 로그인 처리
-    const authResponse = await authService.naverLogin(code, state);
+    // 네이버 OAuth 로그인 처리 (null을 undefined로 변환)
+    const authResponse = await authService.naverLogin(code, state || undefined);
 
     // 성공 시 쿠키 설정 및 리다이렉트
     const response = NextResponse.redirect(
