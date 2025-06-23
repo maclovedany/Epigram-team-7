@@ -105,12 +105,13 @@ src/
 │   │   ├── EpigramTagInput.tsx   # 태그 입력 컴포넌트
 │   │   ├── LoadingSpinner.tsx    # 로딩 스피너
 │   │   └── EmptyState.tsx        # 빈 상태 컴포넌트
-│   └── layout/                   # 레이아웃 컴포넌트
-│       └── Header.tsx            # 헤더 컴포넌트
+│   ├── layout/                   # 레이아웃 컴포넌트
+│   │   └── Header.tsx            # 헤더 컴포넌트
+│   └── AuthProvider.tsx          # 인증 상태 관리 프로바이더
 ├── lib/                          # 유틸리티 및 설정
 │   ├── services/                 # 서비스 레이어 (분리된 구조)
 │   │   ├── api.ts                # API 클라이언트 설정
-│   │   ├── authService.ts        # 인증 서비스
+│   │   ├── authService.ts        # 인증 서비스 (네이버 OAuth 포함)
 │   │   ├── epigramService.ts     # 에피그램 통합 서비스
 │   │   ├── epigramCRUD.ts        # 에피그램 CRUD 작업
 │   │   ├── epigramLike.ts        # 좋아요 처리
