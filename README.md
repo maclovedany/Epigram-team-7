@@ -16,6 +16,7 @@ Epigram은 사용자들이 감동받은 명언, 글귀, 토막 상식들을 공�
 - **공개 피드**: 모든 사용자의 에피그램을 시간순으로 조회
 - **반응형 디자인**: 모바일과 데스크톱 모든 환경에서 최적화된 경험
 - **권한 기반 접근 제어**: 작성자만 수정/삭제 가능
+- **네이버 간편로그인**: 네이버 OAuth 2.0을 통한 소셜 로그인 지원
 
 ## 🚀 기술 스택
 
@@ -175,9 +176,11 @@ src/
 
 ### 👤 인증 시스템
 
-- **로그인** (`/login`): 이메일/비밀번호 로그인
+- **로그인** (`/login`): 이메일/비밀번호 로그인 + 네이버 간편로그인
 - **회원가입** (`/signup`): 이메일, 비밀번호, 닉네임 등록
+- **네이버 OAuth 2.0**: 소셜 로그인으로 간편한 회원가입/로그인
 - JWT 토큰 기반 인증
+- 쿠키 기반 세션 관리
 - 자동 토큰 갱신
 
 ## 💬 댓글 기능
@@ -205,5 +208,68 @@ src/
 - **API Base URL**: `https://fe-project-epigram-api.vercel.app`
 - **인증 방식**: JWT Bearer Token
 - **API 문서**: REST API 기반
+
+## 🔐 네이버 간편로그인
+
+### 기능 개요
+
+- **네이버 OAuth 2.0** 프로토콜을 활용한 소셜 로그인
+- 복잡한 회원가입 절차 없이 **네이버 계정으로 간편 로그인**
+- 기존 이메일/비밀번호 로그인과 병행 지원
+
+### 구현 특징
+
+- **3단계 OAuth 플로우**:
+
+  1. 네이버 인증 서버로 사용자 리다이렉트
+  2. 인증 완료 후 authorization code 수신
+  3. 코드를 액세스 토큰으로 교환 → 사용자 정보 조회 → 자체 JWT 발급
+
+- **보안 강화**:
+
+  - CSRF 방지를 위한 `state` 매개변수 활용
+  - httpOnly 쿠키를 통한 안전한 토큰 저장
+  - 클라이언트/서버 환경변수 분리
+
+- **사용자 경험 최적화**:
+  - 네이버 브랜드 컬러 (#03C75A) 버튼 디자인
+  - 로그인 성공 시 자동으로 에피그램 피드로 이동
+  - 실패 시 적절한 에러 메시지 표시
+
+### 기술 구현
+
+```typescript
+// 네이버 OAuth URL 생성
+const naverAuthURL =
+  `https://nid.naver.com/oauth2.0/authorize?` +
+  `response_type=code&` +
+  `client_id=${NAVER_CLIENT_ID}&` +
+  `redirect_uri=${CALLBACK_URL}&` +
+  `state=${randomState}`;
+
+// 토큰 교환 및 사용자 정보 조회
+const tokenResponse = await fetch("https://nid.naver.com/oauth2.0/token", {
+  method: "POST",
+  body: new URLSearchParams({
+    /* OAuth 매개변수 */
+  }),
+});
+
+const userResponse = await fetch("https://openapi.naver.com/v1/nid/me", {
+  headers: { Authorization: `Bearer ${accessToken}` },
+});
+```
+
+### 환경설정
+
+```bash
+# 클라이언트 환경변수
+NEXT_PUBLIC_NAVER_CLIENT_ID=your_client_id
+NEXT_PUBLIC_BASE_URL=https://epigram-team-7.vercel.app
+
+# 서버 환경변수
+NAVER_CLIENT_ID=your_client_id
+NAVER_CLIENT_SECRET=your_client_secret
+```
 
 ## 배포 : https://epigram-team-7.vercel.app/
