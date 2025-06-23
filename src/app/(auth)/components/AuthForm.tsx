@@ -32,13 +32,15 @@ export function AuthForm<T extends z.ZodSchema>({
     : "이미 계정이 있으신가요?";
 
   const handleNaverLogin = () => {
-    // 네이버 OAuth URL 생성 (실제 구현 시 환경변수에서 가져와야 함)
+    // 환경변수에서 기본 URL 가져오기, 없으면 현재 origin 사용
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+
     const naverAuthURL =
       `https://nid.naver.com/oauth2.0/authorize?` +
       `response_type=code&` +
       `client_id=${process.env.NEXT_PUBLIC_NAVER_CLIENT_ID}&` +
       `redirect_uri=${encodeURIComponent(
-        window.location.origin + "/api/auth/naver/callback"
+        baseUrl + "/api/auth/naver/callback"
       )}&` +
       `state=${Math.random().toString(36).substring(2, 15)}`;
 
