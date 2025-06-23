@@ -82,6 +82,7 @@ export function useAuthForm<T extends z.ZodSchema>({
     errors,
     isSubmitting,
     apiError,
+    setApiError,
     onSubmit,
   };
 }

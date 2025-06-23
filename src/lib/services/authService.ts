@@ -133,6 +133,111 @@ export const authService = {
     }
   },
 
+  // 네이버 로그인
+  naverLogin: async (code: string, state?: string): Promise<AuthResponse> => {
+    try {
+      console.log("Naver login request:", { code, state });
+
+      // 네이버 액세스 토큰 요청
+      const tokenResponse = await fetch(
+        "https://nid.naver.com/oauth2.0/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: process.env.NAVER_CLIENT_ID!,
+            client_secret: process.env.NAVER_CLIENT_SECRET!,
+            code,
+            redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/naver/callback`,
+          }),
+        }
+      );
+
+      if (!tokenResponse.ok) {
+        throw new Error("네이버 토큰 요청 실패");
+      }
+
+      const tokenData = await tokenResponse.json();
+
+      if (tokenData.error) {
+        throw new Error(`네이버 토큰 오류: ${tokenData.error_description}`);
+      }
+
+      // 네이버 사용자 정보 요청
+      const userResponse = await fetch("https://openapi.naver.com/v1/nid/me", {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("네이버 사용자 정보 요청 실패");
+      }
+
+      const userData = await userResponse.json();
+
+      if (userData.resultcode !== "00") {
+        throw new Error("네이버 사용자 정보 오류");
+      }
+
+      // 백엔드에 네이버 로그인 정보 전송
+      const response = await api.post<ApiResponse<AuthResponse>>(
+        "/auth/naver",
+        {
+          accessToken: tokenData.access_token,
+          userInfo: userData.response,
+        }
+      );
+
+      console.log("Naver login response:", response.data);
+
+      // 응답 구조 확인 및 처리
+      if (response.data && response.data.data) {
+        return response.data.data;
+      } else if (
+        response.data &&
+        (response.data as any).user &&
+        (response.data as any).accessToken
+      ) {
+        return response.data as unknown as AuthResponse;
+      } else {
+        throw new Error(
+          "Invalid response structure: " + JSON.stringify(response.data)
+        );
+      }
+    } catch (error) {
+      console.error("Naver login error:", error);
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as any;
+        const status = axiosError.response?.status;
+        const responseData = axiosError.response?.data;
+
+        console.error("Error status:", status);
+        console.error("Error response:", responseData);
+
+        if (status === 400 && responseData?.message) {
+          throw new Error(responseData.message);
+        } else if (status === 401) {
+          throw new Error("네이버 로그인 인증에 실패했습니다.");
+        } else if (status === 500) {
+          throw new Error(
+            "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+          );
+        }
+      }
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "네이버 로그인에 실패했습니다.";
+      throw new Error(message);
+    }
+  },
+
   // 토큰 갱신
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     try {

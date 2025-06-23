@@ -31,6 +31,20 @@ export function AuthForm<T extends z.ZodSchema>({
     ? "회원이 아니신가요?"
     : "이미 계정이 있으신가요?";
 
+  const handleNaverLogin = () => {
+    // 네이버 OAuth URL 생성 (실제 구현 시 환경변수에서 가져와야 함)
+    const naverAuthURL =
+      `https://nid.naver.com/oauth2.0/authorize?` +
+      `response_type=code&` +
+      `client_id=${process.env.NEXT_PUBLIC_NAVER_CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(
+        window.location.origin + "/api/auth/naver/callback"
+      )}&` +
+      `state=${Math.random().toString(36).substring(2, 15)}`;
+
+    window.location.href = naverAuthURL;
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-[#F5F6FA]">
       {/* API 에러 메시지 */}
@@ -94,6 +108,27 @@ export function AuthForm<T extends z.ZodSchema>({
       >
         {isSubmitting ? `${submitText} 중...` : submitText}
       </Button>
+
+      {/* SNS 로그인 - 로그인 모드에서만 표시 */}
+      {isLogin && (
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="px-4 text-sm text-gray-500">SNS 로그인</span>
+            <div className="flex-1 border-t border-gray-300"></div>
+          </div>
+
+          {/* 네이버 로그인 버튼 */}
+          <Button
+            type="button"
+            onClick={handleNaverLogin}
+            className="w-full py-3 rounded-xl bg-[#03C75A] text-white font-semibold text-base border-0 hover:bg-[#02B351] transition-colors"
+            style={{ boxShadow: "none" }}
+          >
+            네이버
+          </Button>
+        </div>
+      )}
 
       {/* 링크 */}
       <div className="text-right">
