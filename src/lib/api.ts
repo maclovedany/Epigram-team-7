@@ -26,12 +26,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // 좋아요 요청이나 댓글 요청이 아닌 경우에만 자동 리다이렉트
+      // 인증 상태 확인 요청은 리다이렉트하지 않음
+      const isAuthCheck = error.config?.url?.includes("/auth/me");
       const isLikeRequest = error.config?.url?.includes("/like");
       const isCommentRequest = error.config?.url?.includes("/comments");
-      if (!isLikeRequest && !isCommentRequest) {
-        // 쿠키는 서버에서 삭제되므로 바로 리다이렉트
-        window.location.href = "/login";
+
+      if (!isAuthCheck && !isLikeRequest && !isCommentRequest) {
+        // 현재 페이지가 로그인 페이지가 아닌 경우에만 리다이렉트
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);

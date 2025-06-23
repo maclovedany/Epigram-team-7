@@ -151,7 +151,10 @@ export const authService = {
             client_id: process.env.NAVER_CLIENT_ID || "",
             client_secret: process.env.NAVER_CLIENT_SECRET || "",
             code,
-            redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/naver/callback`,
+            redirect_uri: `${
+              process.env.NEXT_PUBLIC_BASE_URL ||
+              "https://epigram-team-7.vercel.app"
+            }/api/auth/naver/callback`,
           }),
         }
       );
@@ -187,7 +190,9 @@ export const authService = {
       }
 
       // 3. 자체 API에 로그인 요청 (서버사이드에서는 전체 URL 사용)
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "https://epigram-team-7.vercel.app";
+      console.log("API 요청 URL:", `${baseUrl}/api/auth/naver`);
       const apiResponse = await fetch(`${baseUrl}/api/auth/naver`, {
         method: "POST",
         headers: {
@@ -266,10 +271,18 @@ export const authService = {
   // 현재 사용자 정보 조회 (쿠키 기반)
   getCurrentUser: async () => {
     try {
+      console.log("사용자 정보 조회 중...");
       const response = await api.get("/auth/me");
+      console.log("사용자 정보 조회 성공:", response.data.user);
       return response.data.user;
-    } catch (error) {
-      console.log("현재 사용자 정보 없음:", error);
+    } catch (error: any) {
+      console.log("현재 사용자 정보 없음 (정상):", error?.response?.status);
+      // 401은 정상적인 로그아웃 상태이므로 조용히 처리
+      if (error?.response?.status === 401) {
+        return null;
+      }
+      // 다른 에러는 로그 출력
+      console.error("사용자 정보 조회 에러:", error);
       return null;
     }
   },
