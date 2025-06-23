@@ -155,9 +155,10 @@ export const authService = {
         }
       );
 
-      // if (!tokenResponse.ok) {
-      //   throw new Error("네이버 토큰 요청 실패");
-      // }
+      if (!tokenResponse.ok) {
+        console.log(await tokenResponse.text());
+        throw new Error("네이버 토큰 요청 실패");
+      }
 
       const response = await tokenResponse.json();
       console.log(response);
