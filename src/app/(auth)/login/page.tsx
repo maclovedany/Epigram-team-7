@@ -1,36 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { useAuthForm } from "../hooks/useAuthForm";
-import { AuthForm } from "../components";
-import { loginSchema } from "@/lib/validations";
+import { Suspense } from "react";
+import { LoginContent } from "./LoginContent";
 
 export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const errorFromUrl = searchParams.get("error");
-
-  const {
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
-    apiError,
-    onSubmit,
-    setApiError,
-  } = useAuthForm({
-    schema: loginSchema,
-    defaultValues: { email: "", password: "" },
-    mode: "login",
-  });
-
-  // URL에서 에러 파라미터 처리
-  useEffect(() => {
-    if (errorFromUrl && setApiError) {
-      setApiError(decodeURIComponent(errorFromUrl));
-    }
-  }, [errorFromUrl, setApiError]);
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F7FA]">
       <main className="flex-1 flex flex-col items-center justify-center px-4">
@@ -45,16 +18,9 @@ export default function LoginPage() {
             />
           </div>
           <div className="w-full">
-            {/* 로그인 폼 */}
-            <AuthForm
-              mode="login"
-              register={register}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              isSubmitting={isSubmitting}
-              apiError={apiError}
-              onSubmit={onSubmit}
-            />
+            <Suspense fallback={<div>로딩 중...</div>}>
+              <LoginContent />
+            </Suspense>
           </div>
         </div>
       </main>
