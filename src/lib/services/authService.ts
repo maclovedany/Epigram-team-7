@@ -147,8 +147,7 @@ export const authService = {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            redirectUri:
-              "https://epigram-team-7.vercel.app/api/auth/naver/callback",
+            redirectUri: "http://localhost:3000/api/auth/naver/callback",
             token: code,
             state,
           }),
