@@ -44,6 +44,7 @@ export function AuthForm<T extends z.ZodSchema>({
       )}&` +
       `state=${Math.random().toString(36).substring(2, 15)}`;
 
+    console.log("Naver OAuth URL:", naverAuthURL);
     window.location.href = naverAuthURL;
   };
 

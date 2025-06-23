@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
     // 네이버 OAuth 로그인 처리 (null을 undefined로 변환)
     const authResponse = await authService.naverLogin(code, state || undefined);
 
+    console.log("콜백 처리 - 인증 응답:", authResponse);
+
     // 성공 시 쿠키 설정 및 리다이렉트
     const response = NextResponse.redirect(
       new URL("/epigramlist", request.url)
@@ -40,6 +42,15 @@ export async function GET(request: NextRequest) {
 
     // 액세스 토큰을 httpOnly 쿠키로 설정
     response.cookies.set("accessToken", authResponse.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7일
+    });
+
+    // 사용자 정보도 쿠키에 저장 (임시 - 실제로는 JWT에 포함하거나 DB에서 조회)
+    response.cookies.set("userInfo", JSON.stringify(authResponse.user), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -57,6 +68,8 @@ export async function GET(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 30, // 30일
       });
     }
+
+    console.log("쿠키 설정 완료 - 리다이렉트 중");
 
     return response;
   } catch (error) {

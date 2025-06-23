@@ -138,40 +138,75 @@ export const authService = {
     try {
       console.log("Naver login request:", { code, state });
 
-      // 네이버 액세스 토큰 요청
+      // 1. 네이버 액세스 토큰 요청
       const tokenResponse = await fetch(
-        "https://epigram-team-7.vercel.app/14-98/auth/signIn/NAVER",
+        "https://nid.naver.com/oauth2.0/token",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: JSON.stringify({
-            redirectUri: "http://localhost:3000/api/auth/naver/callback",
-            token: code,
-            state,
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: process.env.NAVER_CLIENT_ID || "",
+            client_secret: process.env.NAVER_CLIENT_SECRET || "",
+            code,
+            redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/naver/callback`,
           }),
         }
       );
 
       if (!tokenResponse.ok) {
-        console.log(await tokenResponse.text());
+        console.log("Token response error:", tokenResponse);
         throw new Error("네이버 토큰 요청 실패");
       }
 
-      const response = await tokenResponse.json();
-      console.log(response);
+      const tokenData = await tokenResponse.json();
+      console.log("Token data:", tokenData);
 
-      // 에러 체크
-      if (response.error) {
-        throw new Error(
-          `네이버 로그인 오류: ${response.error_description || response.error}`
-        );
+      if (tokenData.error) {
+        throw new Error(`네이버 토큰 오류: ${tokenData.error_description}`);
       }
 
+      // 2. 네이버 사용자 정보 요청
+      const userResponse = await fetch("https://openapi.naver.com/v1/nid/me", {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("네이버 사용자 정보 요청 실패");
+      }
+
+      const userData = await userResponse.json();
+      console.log("User data:", userData);
+
+      if (userData.resultcode !== "00") {
+        throw new Error("네이버 사용자 정보 오류");
+      }
+
+      // 3. 자체 API에 로그인 요청 (서버사이드에서는 전체 URL 사용)
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      const apiResponse = await fetch(`${baseUrl}/api/auth/naver`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken: tokenData.access_token,
+          userInfo: userData.response,
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API 요청 실패: ${apiResponse.status}`);
+      }
+
+      const response = await apiResponse.json();
       console.log("Naver login response:", response);
 
-      // 응답 구조 확인 및 처리 (fetch API 응답이므로 .data 없음)
+      // 응답 구조 확인 및 처리
       if (response.data) {
         return response.data;
       } else if (response.user && response.accessToken) {
@@ -225,6 +260,17 @@ export const authService = {
           ? error.message
           : "토큰 갱신 중 오류가 발생했습니다.";
       throw new Error(message);
+    }
+  },
+
+  // 현재 사용자 정보 조회 (쿠키 기반)
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get("/auth/me");
+      return response.data.user;
+    } catch (error) {
+      console.log("현재 사용자 정보 없음:", error);
+      return null;
     }
   },
 
