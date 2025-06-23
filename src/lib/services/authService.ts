@@ -155,34 +155,30 @@ export const authService = {
         }
       );
 
-      if (!tokenResponse.ok) {
-        throw new Error("네이버 토큰 요청 실패");
-      }
+      // if (!tokenResponse.ok) {
+      //   throw new Error("네이버 토큰 요청 실패");
+      // }
 
       const response = await tokenResponse.json();
+      console.log(response);
 
-      //  if (tokenData.error) {
-      //   throw new Error(`네이버 토큰 오류: ${tokenData.error_description}`);
-      // }
+      // 에러 체크
+      if (response.error) {
+        throw new Error(
+          `네이버 로그인 오류: ${response.error_description || response.error}`
+        );
+      }
 
-      // if (userData.resultcode !== "00") {
-      //   throw new Error("네이버 사용자 정보 오류");
-      // }
+      console.log("Naver login response:", response);
 
-      console.log("Naver login response:", response.data);
-
-      // 응답 구조 확인 및 처리
-      if (response.data && response.data.data) {
-        return response.data.data;
-      } else if (
-        response.data &&
-        (response.data as any).user &&
-        (response.data as any).accessToken
-      ) {
-        return response.data as unknown as AuthResponse;
+      // 응답 구조 확인 및 처리 (fetch API 응답이므로 .data 없음)
+      if (response.data) {
+        return response.data;
+      } else if (response.user && response.accessToken) {
+        return response as AuthResponse;
       } else {
         throw new Error(
-          "Invalid response structure: " + JSON.stringify(response.data)
+          "Invalid response structure: " + JSON.stringify(response)
         );
       }
     } catch (error) {
