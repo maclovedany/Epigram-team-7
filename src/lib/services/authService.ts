@@ -158,37 +158,15 @@ export const authService = {
         throw new Error("네이버 토큰 요청 실패");
       }
 
-      const tokenData = await tokenResponse.json();
+      const response = await tokenResponse.json();
 
-      if (tokenData.error) {
-        throw new Error(`네이버 토큰 오류: ${tokenData.error_description}`);
-      }
+      //  if (tokenData.error) {
+      //   throw new Error(`네이버 토큰 오류: ${tokenData.error_description}`);
+      // }
 
-      // 네이버 사용자 정보 요청
-      const userResponse = await fetch("https://openapi.naver.com/v1/nid/me", {
-        headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        throw new Error("네이버 사용자 정보 요청 실패");
-      }
-
-      const userData = await userResponse.json();
-
-      if (userData.resultcode !== "00") {
-        throw new Error("네이버 사용자 정보 오류");
-      }
-
-      // 백엔드에 네이버 로그인 정보 전송
-      const response = await api.post<ApiResponse<AuthResponse>>(
-        "/auth/naver",
-        {
-          accessToken: tokenData.access_token,
-          userInfo: userData.response,
-        }
-      );
+      // if (userData.resultcode !== "00") {
+      //   throw new Error("네이버 사용자 정보 오류");
+      // }
 
       console.log("Naver login response:", response.data);
 
