@@ -140,18 +140,16 @@ export const authService = {
 
       // 네이버 액세스 토큰 요청
       const tokenResponse = await fetch(
-        "https://nid.naver.com/oauth2.0/token",
+        "https://epigram-team-7.vercel.app/14-98/auth/signIn/NAVER/token",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
           },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            client_id: process.env.NAVER_CLIENT_ID!,
-            client_secret: process.env.NAVER_CLIENT_SECRET!,
-            code,
-            redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/naver/callback`,
+          body: JSON.stringify({
+            redirectUri:
+              "https://epigram-team-7.vercel.app/api/auth/naver/callback",
+            token: code,
           }),
         }
       );
